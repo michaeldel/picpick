@@ -1,8 +1,6 @@
 import argparse
 import pathlib
 
-from typing import List
-
 from .gui import MainWindow
 
 

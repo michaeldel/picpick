@@ -24,15 +24,17 @@ class ImageDisplay(tk.Canvas):
     def _set_canvas_image(self, image: Image):
         # keep stored as object attribute to prevent garbage collection
         self._photo = ImageTk.PhotoImage(image)
-        if not hasattr(self, '_canvas_image'):
-            width = self.winfo_width()
-            height = self.winfo_height()
 
+        width = self.winfo_width()
+        height = self.winfo_height()
+
+        if not hasattr(self, '_canvas_image'):
             self._canvas_image = self.create_image(
                 width / 2, height / 2, anchor=tk.CENTER, image=self._photo
             )
         else:
             self.itemconfig(self._canvas_image, image=self._photo)
+            self.coords(self._canvas_image, width / 2, height / 2)
 
     def _resize(self):
         width = self.winfo_width()

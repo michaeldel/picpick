@@ -3,6 +3,8 @@ import pathlib
 
 from typing import List
 
+from .gui import MainWindow
+
 
 def path(input: List[str]) -> List[pathlib.Path]:
     return [pathlib.Path(s) for s in input]
@@ -15,3 +17,6 @@ parser.add_argument(
 args = parser.parse_args()
 
 print(args)
+
+window = MainWindow(args.input)
+window.run()

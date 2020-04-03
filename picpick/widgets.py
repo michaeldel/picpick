@@ -9,7 +9,13 @@ MIN_HEIGHT = 128
 class ImageDisplay(tk.Canvas):
     def __init__(self, master=None):
         super().__init__(master=master)
-        self.bind('<Configure>', lambda e: self._resize())
+
+        def configure(e: tk.Event):
+            if self._image is not None:
+                self._resize()
+
+        self.bind('<Configure>', configure)
+        self._image = None
 
     def set_image(self, image: Image):
         self._image = image

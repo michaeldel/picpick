@@ -3,43 +3,47 @@ import tkinter as tk
 
 from typing import List
 
-from PIL import Image, ImageTk
+from PIL import Image
+
+from . import widgets
 
 
 class MainWindow(tk.Tk):
     def __init__(self, paths: List[pathlib.Path]):
         assert len(paths) > 0
+        self._paths = paths
 
         super().__init__()
-
-        image = Image.open(paths[-1])
-        canvas = tk.Canvas(master=self)
-
-        canvas_image = canvas.create_image(
-            0, 0, anchor=tk.CENTER, image=ImageTk.PhotoImage(image)
-        )
-
-        def configure(event: tk.Event):
-            # use thumbnail to maintain aspect ratio
-            width = canvas.winfo_width()
-            height = canvas.winfo_height()
-
-            assert width <= event.width
-            assert height <= event.height
-
-            resized = image.copy()
-            resized.thumbnail((width, height), Image.ANTIALIAS)
-
-            photo = ImageTk.PhotoImage(resized)
-
-            canvas.itemconfig(canvas_image, image=photo)
-            canvas.photo = photo  # prevent garbage collection
-            canvas.coords(canvas_image, (width / 2, height / 2))
-
-        canvas.bind('<Configure>', configure)
-        canvas.pack(fill=tk.BOTH, expand=True)
-
+        self.geometry('720x480')
         self.attributes('-type', 'dialog')  # make window floating on i3wm
+
+        self._setup_paths_listbox()
+        self._setup_image_display()
+
+        self.select_image(self._paths[0])
+
+    def select_image(self, path: pathlib.Path):
+        assert path in self._paths
+        self._image_display.set_image(Image.open(path))
+
+    def _setup_paths_listbox(self):
+        paths_listbox = tk.Listbox(master=self)
+        paths_listbox.insert(tk.END, *self._paths)
+
+        def select(event: tk.Event):
+            widget = event.widget
+            assert isinstance(widget, tk.Listbox)
+            selection = widget.curselection()
+            assert isinstance(selection, tuple) and len(selection) == 1
+
+            self.select_image(pathlib.Path(widget.get(selection[0])))
+
+        paths_listbox.bind('<<ListboxSelect>>', select)
+        paths_listbox.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
+
+    def _setup_image_display(self):
+        self._image_display = widgets.ImageDisplay(master=self)
+        self._image_display.pack(fill=tk.BOTH, expand=True)
 
     def run(self):
         self.mainloop()

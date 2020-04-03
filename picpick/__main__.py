@@ -8,7 +8,7 @@ def path(input: List[str]) -> List[pathlib.Path]:
     return [pathlib.Path(s) for s in input]
 
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(prog='picpick')
 parser.add_argument(
     'input', nargs='+', type=pathlib.Path, help="Path of input file (e.g. /tmp/pic.jpg)"
 )

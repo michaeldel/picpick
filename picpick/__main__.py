@@ -7,9 +7,6 @@ from .gui import MainWindow
 def dir_path(input: str) -> pathlib.Path:
     path = pathlib.Path(input)
     if not path.is_dir():
-        print(input)
-        print('---')
-        print(path)
         raise NotADirectoryError
     return path
 

@@ -1,6 +1,8 @@
 import pathlib
+import shutil
 import tkinter as tk
 
+from tkinter import messagebox
 from typing import Callable, List
 
 from PIL import Image
@@ -64,7 +66,14 @@ class MainWindow(tk.Tk):
                 if self._current_input_path_index < len(self._input_paths):
                     self.select_image(self._input_paths[self._current_input_path_index])
                 else:
-                    print(self._to_move)
+                    summary = '\n'.join(
+                        f"{src} -> {dst}" for src, dst in self._to_move.items()
+                    )
+                    print(summary)
+                    if messagebox.askokcancel(message="Peform move?"):
+                        for src, dst in self._to_move.items():
+                            shutil.move(str(src), str(dst))
+                        messagebox.showinfo(message="Done!")
 
             return inner
 

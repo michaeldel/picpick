@@ -1,42 +1,32 @@
-import pathlib
-import shutil
 import tkinter as tk
 
 from tkinter import messagebox
-from typing import Callable, List
 
 from PIL import Image
 
 from . import widgets
+from .app import App
 
 
 class MainWindow(tk.Tk):
-    def __init__(
-        self, input_paths: List[pathlib.Path], output_paths: List[pathlib.Path]
-    ):
-        assert len(input_paths) > 0
-        assert len(output_paths) > 0
-
-        self._input_paths = input_paths
-
+    def __init__(self, app: App):
         super().__init__()
+
+        self.app = app
+
         self.geometry('720x480')
         self.attributes('-type', 'dialog')  # make window floating on i3wm
 
         self._setup_paths_listbox()
         self._setup_image_display()
-        self._setup_picking_buttons(output_paths)
-
-        self._to_move = {}
-        self._current_input_path_index = 0
-        self.select_image(self._input_paths[self._current_input_path_index])
-
-    def select_image(self, path: pathlib.Path):
-        self._image_display.set_image(Image.open(path))
+        self._setup_picking_buttons()
+        self._update_image_display()
 
     def _setup_paths_listbox(self):
         paths_listbox = tk.Listbox(master=self, width=50)
-        paths_listbox.insert(tk.END, *self._input_paths)
+
+        values = self.app.inputs
+        paths_listbox.insert(tk.END, *values)
 
         def select(event: tk.Event):
             widget = event.widget
@@ -44,7 +34,8 @@ class MainWindow(tk.Tk):
             selection = widget.curselection()
             assert isinstance(selection, tuple) and len(selection) == 1
 
-            self.select_image(pathlib.Path(widget.get(selection[0])))
+            self.app.select_image(values[selection[0]])
+            self._update_image_display()
 
         paths_listbox.bind('<<ListboxSelect>>', select)
         paths_listbox.pack(fill=tk.BOTH, side=tk.LEFT)
@@ -53,34 +44,34 @@ class MainWindow(tk.Tk):
         self._image_display = widgets.ImageDisplay(master=self)
         self._image_display.pack(fill=tk.BOTH, expand=True)
 
-    def _setup_picking_buttons(self, output_paths: List[pathlib.Path]):
-        frame = tk.Frame(master=self, bg='red')
+    def _update_image_display(self):
+        path = self.app.current_image
+        self._image_display.set_image(Image.open(path))
+
+    def _setup_picking_buttons(self):
+        frame = tk.Frame(master=self, padx=4, pady=4)
         frame.pack(fill=tk.X)
 
-        def mark_to_move(output_path: pathlib.Path) -> Callable[[None], None]:
+        def command(output):
             def inner():
-                current_input_path = self._input_paths[self._current_input_path_index]
-                self._to_move[current_input_path] = output_path
-                self._current_input_path_index += 1
-
-                if self._current_input_path_index < len(self._input_paths):
-                    self.select_image(self._input_paths[self._current_input_path_index])
-                else:
+                self.app.assign_current_image_to(output)
+                try:
+                    self.app.next_image()
+                    self._update_image_display()
+                except StopIteration:
                     summary = '\n'.join(
-                        f"{src} -> {dst}" for src, dst in self._to_move.items()
+                        f"{src} -> {dst}" for src, dst in self.app._assignments.items()
                     )
                     print(summary)
-                    if messagebox.askokcancel(message="Peform move?"):
-                        for src, dst in self._to_move.items():
-                            shutil.move(str(src), str(dst))
+
+                    if messagebox.askokcancel(message="Perform move ?"):
+                        self.app.perform_assignments()
                         messagebox.showinfo(message="Done!")
 
             return inner
 
-        for output_path in output_paths:
-            button = tk.Button(
-                master=frame, text=output_path, command=mark_to_move(output_path),
-            )
+        for output in self.app.outputs:
+            button = tk.Button(master=frame, text=output.path, command=command)
             button.pack(fill=tk.X, expand=True, side=tk.LEFT)
 
     def run(self):

@@ -30,7 +30,8 @@ class MainWindow(tk.Tk):
 
         ROOT = ''
         for i, input in enumerate(self.app.inputs):
-            self._input_paths_display.insert(ROOT, tk.END, text=str(input), values=[i])
+            tag = str(i)
+            self._input_paths_display.insert(ROOT, tk.END, text=str(input), tags=(tag,))
 
         def select(event: tk.Event):
             widget = event.widget
@@ -39,7 +40,7 @@ class MainWindow(tk.Tk):
             assert isinstance(selection, tuple) and len(selection) == 1
 
             # TODO: refactor this properly
-            index = widget.item(selection[0])['values'][0]
+            index = widget.item(selection[0])['tags'][0]
             self.app.select_image(self.app.inputs[index])
 
             self._update_image_display()

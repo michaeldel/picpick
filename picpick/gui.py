@@ -70,9 +70,15 @@ class MainWindow(tk.Tk):
 
             return inner
 
-        for output in self.app.outputs:
-            button = tk.Button(master=frame, text=output.path, command=command)
+        for i, output in enumerate(self.app.outputs):
+            key = i + 1
+            func = command(output)
+
+            button = tk.Button(
+                master=frame, text=f"[{key}] {output.path}", command=func
+            )
             button.pack(fill=tk.X, expand=True, side=tk.LEFT)
+            self.bind(key, lambda _: func())
 
     def run(self):
         self.mainloop()

@@ -16,13 +16,13 @@ parser.add_argument(
     'input',
     nargs='+',
     type=pathlib.Path,
-    help="Path of input file (e.g. /tmp/pic.jpg)",
+    help="path of input file (e.g. /tmp/pic.jpg)",
 )
 parser.add_argument(
     '--output',
     nargs='+',
     type=dir_path,
-    help="Path of output directory (e.g. /tmp/liked/)",
+    help="path of output directory (e.g. /tmp/liked/)",
 )
 args = parser.parse_args()
 

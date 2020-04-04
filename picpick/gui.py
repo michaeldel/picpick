@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.ttk as ttk
 
 from tkinter import messagebox
 
@@ -17,35 +18,40 @@ class MainWindow(tk.Tk):
         self.geometry('720x480')
         self.attributes('-type', 'dialog')  # make window floating on i3wm
 
-        self._setup_paths_listbox()
+        self._setup_input_paths_display()
         self._setup_image_display()
         self._setup_picking_buttons()
 
         self._update_image_display()
-        self._update_paths_listbox()
+        self._update_input_paths_display()
 
-    def _setup_paths_listbox(self):
-        self._paths_listbox = tk.Listbox(master=self, width=50)
+    def _setup_input_paths_display(self):
+        self._input_paths_display = ttk.Treeview(master=self, selectmode='browse')
 
-        values = self.app.inputs
-        self._paths_listbox.insert(tk.END, *values)
+        ROOT = ''
+        for i, input in enumerate(self.app.inputs):
+            self._input_paths_display.insert(ROOT, tk.END, text=str(input), values=[i])
 
         def select(event: tk.Event):
             widget = event.widget
-            assert isinstance(widget, tk.Listbox)
-            selection = widget.curselection()
+            assert isinstance(widget, ttk.Treeview)
+            selection = widget.selection()
             assert isinstance(selection, tuple) and len(selection) == 1
 
-            self.app.select_image(values[selection[0]])
+            # TODO: refactor this properly
+            index = widget.item(selection[0])['values'][0]
+            self.app.select_image(self.app.inputs[index])
+
             self._update_image_display()
 
-        self._paths_listbox.bind('<<ListboxSelect>>', select)
-        self._paths_listbox.pack(fill=tk.BOTH, side=tk.LEFT)
+        self._input_paths_display.bind('<<TreeviewSelect>>', select)
+        self._input_paths_display.pack(fill=tk.BOTH, side=tk.LEFT)
 
-    def _update_paths_listbox(self):
-        n = self._paths_listbox.size()
-        self._paths_listbox.selection_clear(0, n - 1)
-        self._paths_listbox.selection_set(self.app._current_input_image_index)
+    def _update_input_paths_display(self):
+        item = self._input_paths_display.get_children()[
+            self.app._current_input_image_index
+        ]
+        self._input_paths_display.selection_set(item)
 
     def _setup_image_display(self):
         self._image_display = widgets.ImageDisplay(master=self)
@@ -65,7 +71,7 @@ class MainWindow(tk.Tk):
                 try:
                     self.app.next_image()
                     self._update_image_display()
-                    self._update_paths_listbox()
+                    self._update_input_paths_display()
                 except StopIteration:
                     summary = '\n'.join(
                         f"{src} -> {dst}" for src, dst in self.app._assignments.items()

@@ -31,7 +31,8 @@ class MainWindow(tk.Tk):
         ROOT = ''
         for i, input in enumerate(self.app.inputs):
             tag = str(i)
-            self._input_paths_display.insert(ROOT, tk.END, text=str(input), tags=(tag,))
+            text = str(input.path)
+            self._input_paths_display.insert(ROOT, tk.END, text=text, tags=(tag,))
 
         def select(event: tk.Event):
             widget = event.widget
@@ -59,7 +60,7 @@ class MainWindow(tk.Tk):
         self._image_display.pack(fill=tk.BOTH, expand=True)
 
     def _update_image_display(self):
-        path = self.app.current_image
+        path = self.app.current_image.path
         self._image_display.set_image(Image.open(path))
 
     def _setup_picking_buttons(self):

@@ -1,6 +1,7 @@
 import argparse
 import pathlib
 
+from .app import App
 from .gui import MainWindow
 
 
@@ -24,9 +25,15 @@ parser.add_argument(
     type=dir_path,
     help="path of output directory (e.g. /tmp/liked/)",
 )
+parser.add_argument(
+    '--copy', action='store_true', help="copy the input files instead of moving them"
+)
 args = parser.parse_args()
 
 print(args)
 
-window = MainWindow(args.input, args.output)
+mode = 'copy' if args.copy else 'move'
+app = App(args.input, args.output, mode)
+
+window = MainWindow(app=app)
 window.run()

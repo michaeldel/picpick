@@ -20,13 +20,15 @@ class MainWindow(tk.Tk):
         self._setup_paths_listbox()
         self._setup_image_display()
         self._setup_picking_buttons()
+
         self._update_image_display()
+        self._update_paths_listbox()
 
     def _setup_paths_listbox(self):
-        paths_listbox = tk.Listbox(master=self, width=50)
+        self._paths_listbox = tk.Listbox(master=self, width=50)
 
         values = self.app.inputs
-        paths_listbox.insert(tk.END, *values)
+        self._paths_listbox.insert(tk.END, *values)
 
         def select(event: tk.Event):
             widget = event.widget
@@ -37,8 +39,13 @@ class MainWindow(tk.Tk):
             self.app.select_image(values[selection[0]])
             self._update_image_display()
 
-        paths_listbox.bind('<<ListboxSelect>>', select)
-        paths_listbox.pack(fill=tk.BOTH, side=tk.LEFT)
+        self._paths_listbox.bind('<<ListboxSelect>>', select)
+        self._paths_listbox.pack(fill=tk.BOTH, side=tk.LEFT)
+
+    def _update_paths_listbox(self):
+        n = self._paths_listbox.size()
+        self._paths_listbox.selection_clear(0, n - 1)
+        self._paths_listbox.selection_set(self.app._current_input_image_index)
 
     def _setup_image_display(self):
         self._image_display = widgets.ImageDisplay(master=self)
@@ -58,6 +65,7 @@ class MainWindow(tk.Tk):
                 try:
                     self.app.next_image()
                     self._update_image_display()
+                    self._update_paths_listbox()
                 except StopIteration:
                     summary = '\n'.join(
                         f"{src} -> {dst}" for src, dst in self.app._assignments.items()

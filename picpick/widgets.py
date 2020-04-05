@@ -14,6 +14,7 @@ MIN_HEIGHT = 128
 class ImageDisplay(tk.Canvas):
     def __init__(self, master=None):
         super().__init__(master=master)
+        self.configure(background='black')
 
         def configure(e: tk.Event):
             if self._image is not None:

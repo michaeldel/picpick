@@ -1,5 +1,4 @@
 import tkinter as tk
-import tkinter.ttk as ttk
 
 from tkinter import messagebox
 
@@ -18,42 +17,30 @@ class MainWindow(tk.Tk):
         self.geometry('720x480')
         self.attributes('-type', 'dialog')  # make window floating on i3wm
 
-        self._setup_input_paths_display()
+        self._setup_file_list()
         self._setup_image_display()
         self._setup_picking_buttons()
 
         self._update_image_display()
-        self._update_input_paths_display()
+        self._update_file_list()
 
-    def _setup_input_paths_display(self):
-        self._input_paths_display = ttk.Treeview(master=self, selectmode='browse')
-
-        ROOT = ''
-        for i, input in enumerate(self.app.inputs):
-            tag = str(i)
-            text = str(input.path)
-            self._input_paths_display.insert(ROOT, tk.END, text=text, tags=(tag,))
+    def _setup_file_list(self):
+        file_list = widgets.FileList(master=self, inputs=self.app.inputs)
 
         def select(event: tk.Event):
             widget = event.widget
-            assert isinstance(widget, ttk.Treeview)
-            selection = widget.selection()
-            assert isinstance(selection, tuple) and len(selection) == 1
+            assert isinstance(widget, widgets.FileList)
 
-            # TODO: refactor this properly
-            index = widget.item(selection[0])['tags'][0]
-            self.app.select_image(self.app.inputs[index])
-
+            self.app.select_image(widget.selection())
             self._update_image_display()
 
-        self._input_paths_display.bind('<<TreeviewSelect>>', select)
-        self._input_paths_display.pack(fill=tk.BOTH, side=tk.LEFT)
+        file_list.bind('<<FileListSelect>>', select)
+        file_list.pack(fill=tk.BOTH, side=tk.LEFT)
 
-    def _update_input_paths_display(self):
-        item = self._input_paths_display.get_children()[
-            self.app._current_input_image_index
-        ]
-        self._input_paths_display.selection_set(item)
+        self._file_list = file_list
+
+    def _update_file_list(self):
+        self._file_list.selection_set(self.app._current_input_image_index)
 
     def _setup_image_display(self):
         self._image_display = widgets.ImageDisplay(master=self)
@@ -73,7 +60,7 @@ class MainWindow(tk.Tk):
                 try:
                     self.app.next_image()
                     self._update_image_display()
-                    self._update_input_paths_display()
+                    self._update_file_list()
                 except StopIteration:
                     summary = '\n'.join(
                         f"{src} -> {dst}" for src, dst in self.app._assignments.items()

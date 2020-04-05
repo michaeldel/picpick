@@ -13,6 +13,12 @@ def dir_path(input: str) -> pathlib.Path:
 
 
 parser = argparse.ArgumentParser(prog='picpick')
+# parser.add_argument(
+#     '--config',
+#     nargs='?',
+#     type=pathlib.Path,
+#     help="Path of config file (e.g. /tmp/config.ini)",
+# )
 parser.add_argument(
     'input',
     nargs='+',

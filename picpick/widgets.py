@@ -66,8 +66,10 @@ class FileList(tk.Frame):
         tree.configure(yscrollcommand=scroll.set)
         scroll.configure(command=tree.yview)
 
-        tree.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
+        # pack in this order to prevent scrollbar from disappearing when
+        # reducing widget size
         scroll.pack(fill=tk.Y, side=tk.RIGHT)
+        tree.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
         tree.heading('#0', text="File")
 

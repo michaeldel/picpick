@@ -10,6 +10,8 @@ pillow = "^7.1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
+black = {version = "^19.10b0", allow-prereleases = true}
+flake8 = "^3.7.9"
 
 [tool.black]
 target-version = ['py38']

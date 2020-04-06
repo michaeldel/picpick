@@ -67,10 +67,9 @@ class FileList(tk.Frame):
         scroll.configure(command=tree.yview)
 
         tree.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
-        scroll.pack(fill=tk.Y, side=tk.RIGHT, expand=True)
+        scroll.pack(fill=tk.Y, side=tk.RIGHT)
 
         tree.heading('#0', text="File")
-        tree.column('#0', width=200)
 
         ROOT = ''
 

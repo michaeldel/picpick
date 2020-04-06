@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.ttk as ttk
 
 from tkinter import messagebox
 
@@ -17,6 +18,11 @@ class MainWindow(tk.Tk):
         self.geometry('720x480')
         self.attributes('-type', 'dialog')  # make window floating on i3wm
 
+        pw = ttk.PanedWindow(master=self, orient=tk.HORIZONTAL)
+        pw.pack(fill=tk.BOTH, expand=True)
+
+        self._pw = pw
+
         self._setup_file_list()
         self._setup_image_display()
         self._setup_picking_buttons()
@@ -25,7 +31,7 @@ class MainWindow(tk.Tk):
         self._update_file_list()
 
     def _setup_file_list(self):
-        file_list = widgets.FileList(master=self, inputs=self.app.inputs)
+        file_list = widgets.FileList(master=self._pw, inputs=self.app.inputs)
 
         def select(event: tk.Event):
             widget = event.widget
@@ -35,7 +41,7 @@ class MainWindow(tk.Tk):
             self._update_image_display()
 
         file_list.bind('<<FileListSelect>>', select)
-        file_list.pack(fill=tk.BOTH, side=tk.LEFT)
+        self._pw.add(file_list)
 
         self._file_list = file_list
 
@@ -44,7 +50,7 @@ class MainWindow(tk.Tk):
 
     def _setup_image_display(self):
         self._image_display = widgets.ImageDisplay(master=self)
-        self._image_display.pack(fill=tk.BOTH, expand=True)
+        self._pw.add(self._image_display)
 
     def _update_image_display(self):
         path = self.app.current_image.path

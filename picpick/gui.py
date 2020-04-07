@@ -18,6 +18,8 @@ class MainWindow(tk.Tk):
         self.geometry('720x480')
         self.attributes('-type', 'dialog')  # make window floating on i3wm
 
+        self._setup_menu()
+
         pw = ttk.PanedWindow(master=self, orient=tk.HORIZONTAL)
         pw.pack(fill=tk.BOTH, expand=True)
 
@@ -29,6 +31,16 @@ class MainWindow(tk.Tk):
 
         self._update_image_display()
         self._update_file_list()
+
+    def _setup_menu(self):
+        menu = tk.Menu(self)
+
+        file_menu = tk.Menu(menu, tearoff=0)
+        file_menu.add_command(label="Exit", command=self.quit)
+
+        menu.add_cascade(label="File", menu=file_menu)
+
+        self.config(menu=menu)
 
     def _setup_file_list(self):
         file_list = widgets.FileList(master=self._pw, inputs=self.app.inputs)

@@ -62,3 +62,27 @@ def test_open_and_tag_some_images():
     ]
     assert controller.tags == {red, blue}
     assert controller.current_image.tags == {red, blue}
+
+
+def test_tag_and_untag():
+    controller = Controller()
+
+    path = pathlib.Path('foo.jpg')
+    controller.add_images((path,))
+
+    assert controller.current_image.path == path
+
+    red = Tag(name='red')
+    blue = Tag(name='blue')
+    controller.add_tags((red, blue))
+    assert controller.tags == {red, blue}
+    assert controller.current_image.tags == set()
+
+    image = controller.current_image
+
+    controller.tag_image(image, red)
+    controller.tag_image(image, blue)
+    assert image.tags == {red, blue}
+
+    controller.untag_image(image, red)
+    assert image.tags == {blue}

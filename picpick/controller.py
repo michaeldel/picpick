@@ -33,6 +33,14 @@ class Controller:
 
         image.tags.add(tag)
 
+    def untag_image(self, image: Image, tag: Tag):
+        assert image in self._images
+        assert tag in self._tags
+
+        assert tag in image.tags
+
+        image.tags.remove(tag)
+
     @property
     def current_image(self) -> pathlib.Path:
         return self._images[self._current_image_index]

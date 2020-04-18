@@ -30,18 +30,20 @@ def test_open_and_tag_some_images():
     assert controller.current_image.path == pathlib.Path('one.jpg')
 
     # add a tag
-    tag = Tag(name='red')
-    controller.add_tags((tag,))
-    assert controller.tags == {tag}
+    red = Tag(name='red')
+    blue = Tag(name='blue')
+    controller.add_tags((red, blue))
+    assert controller.tags == {red, blue}
     assert controller.current_image.tags == set()
 
     # tag image
-    controller.tag_image(controller.current_image, tag)
-    assert controller.current_image.tags == {tag}
+    controller.tag_image(controller.current_image, red)
+    controller.tag_image(controller.current_image, blue)
+    assert controller.current_image.tags == {red, blue}
 
-    # tagging an image again should not do anything
-    controller.tag_image(controller.current_image, tag)
-    assert controller.current_image.tags == {tag}
+    # tagging an image with the same tag should not do anything
+    controller.tag_image(controller.current_image, red)
+    assert controller.current_image.tags == {red, blue}
 
     # save picking to file
     controller.save(pathlib.Path('/tmp/db.pickle'))
@@ -58,5 +60,5 @@ def test_open_and_tag_some_images():
         pathlib.Path('three.jpg'),
         pathlib.Path('two.jpg'),
     ]
-    assert controller.tags == {tag}
-    assert controller.current_image.tags == {tag}
+    assert controller.tags == {red, blue}
+    assert controller.current_image.tags == {red, blue}

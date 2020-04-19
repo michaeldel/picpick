@@ -5,7 +5,9 @@ import tkinter.ttk as ttk
 from tkinter import filedialog
 from typing import List, Tuple
 
-from . import types as models
+import PIL
+
+from . import types as models, widgets
 from .controller import Controller
 
 
@@ -23,13 +25,20 @@ class MainWindow(tk.Tk):
         pw.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
         file_list = FileList(master=pw)
-        file_list.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
+        image_display = widgets.ImageDisplay(master=pw)
+
+        pw.add(file_list)
+        pw.add(image_display)
 
         self._file_list = file_list
+        self._image_display = image_display
 
     def refresh(self):
         tag_text_pairs = list(enumerate(p.name for p in self.controller.images_paths))
         self._file_list.refresh(tag_text_pairs, self.controller._current_image_index)
+
+        path = self.controller.current_image.path
+        self._image_display.set_image(PIL.Image.open(path))
 
 
 class FileList(tk.Frame):

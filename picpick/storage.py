@@ -1,22 +1,17 @@
 import pathlib
 import pickle
 
-from typing import Set, Tuple
-
-from .types import Image, Tag
+from .model import Model
 
 
-def save(destination: pathlib.Path, images: Set[Image], tags: Set[Tag]):
-    assert len(set(image.path for image in images)) == len(images)
-    assert all(image.tags.issubset(tags) for image in images)
+def save(destination: pathlib.Path, model: Model):
+    assert len(set(image.path for image in model.images)) == len(model.images)
+    assert all(image.tags.issubset(model.tags) for image in model.images)
 
     with destination.open('wb') as f:
-        pickle.dump(images, f)
-        pickle.dump(tags, f)
+        pickle.dump(model, f)
 
 
-def load(source: pathlib.Path) -> Tuple[Set[Image], Set[Tag]]:
+def load(source: pathlib.Path) -> Model:
     with source.open('rb') as f:
-        images = pickle.load(f)
-        tags = pickle.load(f)
-    return images, tags
+        return pickle.load(f)

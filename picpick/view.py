@@ -3,7 +3,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 from tkinter import filedialog
-from typing import List, Tuple
+from typing import Optional, Set
 
 import PIL
 
@@ -24,25 +24,57 @@ class MainWindow(tk.Tk):
         pw = ttk.PanedWindow(master=self, orient=tk.HORIZONTAL)
         pw.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
-        file_list = FileList(master=pw)
         image_display = widgets.ImageDisplay(master=pw)
 
-        pw.add(file_list)
+        ppw = ttk.PanedWindow(master=pw, orient=tk.VERTICAL)
+
+        file_list = FileList(master=ppw, controller=self.controller)
+        tag_list = TagList(master=ppw, controller=self.controller)
+
+        file_list.bind('<<FileListSelect>>', lambda _: self.refresh())
+
+        ppw.add(file_list)
+        ppw.add(tag_list)
+
+        pw.add(ppw)
+        # pw.add(file_list)
         pw.add(image_display)
 
         self._file_list = file_list
+        self._tag_list = tag_list
         self._image_display = image_display
 
+        self.controller.add_tags(
+            [
+                models.Tag(name=name)
+                for name in (
+                    'red',
+                    'blue',
+                    'green',
+                    'yellow',
+                    'orange',
+                    'pink',
+                    'purple',
+                    'white',
+                    'black',
+                    'grey',
+                    'crimson',
+                )
+            ]
+        )
+        tag_list.refresh(None, self.controller.tags)
+
     def refresh(self):
-        tag_text_pairs = list(enumerate(p.name for p in self.controller.images_paths))
-        self._file_list.refresh(tag_text_pairs, self.controller._current_image_index)
+        self._file_list.refresh(self.controller._current_image_index)
 
         path = self.controller.current_image.path
         self._image_display.set_image(PIL.Image.open(path))
 
+        self._tag_list.refresh(self.controller.current_image, self.controller.tags)
+
 
 class FileList(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, controller: Controller):
         super().__init__(master=master)
 
         tree = ttk.Treeview(master=self, selectmode='browse')
@@ -58,11 +90,10 @@ class FileList(tk.Frame):
 
         tree.heading('#0', text="File")
 
-        tree.bind(
-            '<<TreeviewSelect>>', lambda _: self.event_generate('<<FileListSelect>>')
-        )
+        tree.bind('<<TreeviewSelect>>', lambda _: self.refresh())
 
         self._tree = tree
+        self._controller = controller
 
     def selection(self) -> models.Image:
         tree_selection = self._tree.selection()
@@ -70,21 +101,68 @@ class FileList(tk.Frame):
 
         # TODO: refactor this properly
         index = self._tree.item(tree_selection[0])['tags'][0]
-        return self.master.controller._images[index]
+        return self._controller._images[index]
 
     def selection_set(self, index: int):
         item = self._tree.get_children()[index]
         self._tree.selection_set(item)
 
-    def refresh(self, tag_text_pairs: List[Tuple[int, str]], selected_index: int):
+    def refresh(self, selected_index: Optional[int] = None):
+        print("refresh")
         # clear to prevent duplicates
         self._tree.delete(*self._tree.get_children())
 
         ROOT = ''
-        for tag, text in tag_text_pairs:
+        items = list(enumerate(p.name for p in self._controller.images_paths))
+
+        for tag, text in items:
             self._tree.insert(ROOT, tk.END, text=text, tags=(tag,))
 
-        self.selection_set(selected_index)
+        if selected_index is not None:
+            self.selection_set(selected_index)
+
+
+class TagList(tk.Frame):
+    def __init__(self, master, controller: Controller):
+        super().__init__(master=master)
+        label = tk.Label(master=self, text="Tags")
+        label.pack()
+
+        self._controller = controller
+        self._checkboxes = []
+
+        self.refresh(None, set())
+
+    def refresh(self, image: Optional[models.Image], tags: Set[models.Tag]):
+        assert image is None or image.tags.issubset(tags)
+
+        # clear previous items
+        for checkbox in self._checkboxes:
+            checkbox.destroy()
+
+        for tag in sorted(tags, key=lambda t: t.name):
+            text = tag.name
+
+            var = tk.BooleanVar(master=self)
+            var.set(False if image is None else tag in image.tags)
+
+            # https://stackoverflow.com/a/3431699/1812262
+            def command(tag=tag, var=var):
+                if var.get():
+                    self._controller.tag_image(image, tag)
+                else:
+                    self._controller.untag_image(image, tag)
+
+            checkbox = tk.Checkbutton(
+                master=self,
+                text=text,
+                anchor=tk.W,
+                variable=var,
+                command=command,
+                state=tk.DISABLED if image is None else tk.NORMAL,
+            )
+            checkbox.pack(fill=tk.X)
+            self._checkboxes.append(checkbox)
 
 
 class Menu(tk.Menu):

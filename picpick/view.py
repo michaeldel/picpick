@@ -108,7 +108,6 @@ class FileList(tk.Frame):
         self._tree.selection_set(item)
 
     def refresh(self, selected_index: Optional[int] = None):
-        print("refresh")
         # clear to prevent duplicates
         self._tree.delete(*self._tree.get_children())
 

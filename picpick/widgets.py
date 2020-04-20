@@ -1,11 +1,6 @@
 import tkinter as tk
-import tkinter.ttk as ttk
-
-from typing import List
 
 from PIL import Image, ImageTk
-
-from .types import InputImage
 
 MIN_WIDTH = 128
 MIN_HEIGHT = 128
@@ -54,47 +49,3 @@ class ImageDisplay(tk.Canvas):
         resized.thumbnail((width, height), Image.ANTIALIAS)
 
         self._set_canvas_image(resized)
-
-
-class FileList(tk.Frame):
-    def __init__(self, master, inputs: List[InputImage]):
-        super().__init__(master=master)
-
-        tree = ttk.Treeview(master=self, selectmode='browse')
-        scroll = ttk.Scrollbar(master=self, orient=tk.VERTICAL)
-
-        tree.configure(yscrollcommand=scroll.set)
-        scroll.configure(command=tree.yview)
-
-        # pack in this order to prevent scrollbar from disappearing when
-        # reducing widget size
-        scroll.pack(fill=tk.Y, side=tk.RIGHT)
-        tree.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
-
-        tree.heading('#0', text="File")
-
-        ROOT = ''
-
-        for i, input in enumerate(inputs):
-            tag = str(i)
-            text = input.path.name
-            tree.insert(ROOT, tk.END, text=text, tags=(tag,))
-
-        tree.bind(
-            '<<TreeviewSelect>>', lambda _: self.event_generate('<<FileListSelect>>')
-        )
-
-        self._tree = tree
-        self._inputs = inputs
-
-    def selection(self) -> InputImage:
-        tree_selection = self._tree.selection()
-        assert isinstance(tree_selection, tuple) and len(tree_selection) == 1
-
-        # TODO: refactor this properly
-        index = self._tree.item(tree_selection[0])['tags'][0]
-        return self._inputs[index]
-
-    def selection_set(self, index: int):
-        item = self._tree.get_children()[index]
-        self._tree.selection_set(item)

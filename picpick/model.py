@@ -10,15 +10,5 @@ class Image:
 
 
 @dataclass(frozen=True)
-class InputImage:
-    path: pathlib.Path
-
-
-@dataclass
-class Output:
-    path: pathlib.Path
-
-
-@dataclass(frozen=True)
 class Tag:
     name: str

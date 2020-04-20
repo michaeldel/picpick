@@ -170,7 +170,6 @@ class Menu(tk.Menu):
 
         file_menu = tk.Menu(self, tearoff=0)
         file_menu.add_command(label="Open...", command=self._open, accelerator="Ctrl+O")
-        file_menu.add_command(label="Add images...", command=self._add_images)
         file_menu.add_command(
             label="Save as...", command=self._save, accelerator="Ctrl+Shift+S"
         )
@@ -181,22 +180,6 @@ class Menu(tk.Menu):
         master.bind_all('<Control-o>', lambda _: self._open())
         master.bind_all('<Control-Shift-S>', lambda _: self._save())
         master.bind_all('<Control-q>', lambda _: master.quit())  # TODO: add confirm
-
-    def _add_images(self):
-        filenames = filedialog.askopenfilenames(
-            filetypes=(
-                (
-                    "Image file",
-                    '.jpg .jpeg .png .bmp .gif .eps .tiff .ico .ppm .pgm .pbm',
-                ),
-            )
-        )
-        if filenames == () or filenames == '':
-            return
-
-        assert isinstance(filenames, tuple)
-        self.master.controller.add_images(map(pathlib.Path, filenames))
-        self.master.refresh()
 
     def _open(self):
         filename = filedialog.askopenfilename(

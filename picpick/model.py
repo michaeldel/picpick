@@ -12,3 +12,9 @@ class Image:
 @dataclass(frozen=True)
 class Tag:
     name: str
+
+
+class Model:
+    def __init__(self):
+        self.images = set()
+        self.tags = set()

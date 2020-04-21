@@ -3,7 +3,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 from tkinter import filedialog
-from typing import Optional, Set
+from typing import Dict, Optional
 
 import PIL
 
@@ -36,7 +36,6 @@ class MainWindow(tk.Tk):
         ppw.add(tag_list)
 
         pw.add(ppw)
-        # pw.add(file_list)
         pw.add(image_display)
 
         self._file_list = file_list

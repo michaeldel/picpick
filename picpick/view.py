@@ -7,8 +7,7 @@ from typing import Optional, Set
 
 import PIL
 
-from . import types as models, widgets
-from .controller import Controller
+from . import model, widgets
 
 
 class MainWindow(tk.Tk):
@@ -95,7 +94,7 @@ class FileList(tk.Frame):
         self._tree = tree
         self._controller = controller
 
-    def selection(self) -> models.Image:
+    def selection(self) -> model.Image:
         tree_selection = self._tree.selection()
         assert isinstance(tree_selection, tuple) and len(tree_selection) == 1
 

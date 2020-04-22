@@ -31,10 +31,13 @@ def test_save_and_load(save_path: pathlib.Path):
     model.images = {foo, bar}
     model.tags = {red, blue}
 
-    storage.save(save_path, model)
-    loaded_model = storage.load(save_path)
+    current_index = 1
+
+    storage.save(save_path, model, current_index=current_index)
+    loaded_model, loaded_current_index = storage.load(save_path)
 
     assert loaded_model is not model
+    assert loaded_current_index == current_index
 
     assert len(loaded_model.images) == len(model.images) == 2
     assert len(loaded_model.tags) == len(model.tags) == 2

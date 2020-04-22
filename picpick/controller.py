@@ -54,11 +54,14 @@ class Controller:
         self.current_image.tags.remove(tag)
 
     def save(self, to: pathlib.Path):
-        storage.save(to, self._model)
+        current_index = self.images.index(self.current_image)
+        storage.save(to, self._model, current_index=current_index)
 
     def load(self, source: pathlib.Path):
-        model = storage.load(source)
+        model, current_index = storage.load(source)
+
         self.__init__(model=model)
+        self.set_current_image(self.images[current_index])
 
     def run(self):
         self._view.mainloop()

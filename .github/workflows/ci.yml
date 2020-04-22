@@ -24,6 +24,10 @@ jobs:
         curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
         source $HOME/.poetry/env
         poetry config virtualenvs.create false
+    - name: Install virtual display
+      run: |
+        sudo apt-get update
+        sudo apt-get install xvfb
     - name: Install dependencies
       run: |
         source $HOME/.poetry/env
@@ -44,4 +48,4 @@ jobs:
     - name: Test with pytest
       run: |
         source $HOME/.poetry/env
-        pytest
+        xvfb-run --auto-servernum pytest

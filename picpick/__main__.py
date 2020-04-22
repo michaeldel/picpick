@@ -1,8 +1,8 @@
 import argparse
 import pathlib
 
-from .app import App
-from .gui import MainWindow
+from .controller import Controller
+from .model import Image, Model, Tag
 
 
 def dir_path(input: str) -> pathlib.Path:
@@ -13,12 +13,6 @@ def dir_path(input: str) -> pathlib.Path:
 
 
 parser = argparse.ArgumentParser(prog='picpick')
-# parser.add_argument(
-#     '--config',
-#     nargs='?',
-#     type=pathlib.Path,
-#     help="Path of config file (e.g. /tmp/config.ini)",
-# )
 parser.add_argument(
     'input',
     nargs='+',
@@ -26,20 +20,20 @@ parser.add_argument(
     help="path of input file (e.g. /tmp/pic.jpg)",
 )
 parser.add_argument(
-    '--output',
-    nargs='+',
-    type=dir_path,
-    help="path of output directory (e.g. /tmp/liked/)",
+    '--tags', nargs='+', type=str, help="name of tag (e.g. red)",
 )
 parser.add_argument(
     '--copy', action='store_true', help="copy the input files instead of moving them"
 )
 args = parser.parse_args()
 
-print(args)
+# TODO: enforce input and tags uniqueness
+model = Model()
 
-mode = 'copy' if args.copy else 'move'
-app = App(args.input, args.output, mode)
+for path in args.input:
+    model.images.add(Image(path=path))
+for name in args.tags:
+    model.tags.add(Tag(name=name))
 
-window = MainWindow(app=app)
-window.run()
+controller = Controller(model=model)
+controller.run()

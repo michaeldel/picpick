@@ -1,27 +1,10 @@
 import pathlib
-import secrets
-import shutil
-import tempfile
-
-from typing import Generator
-
-import pytest  # type: ignore
 
 from picpick import storage
 from picpick.model import Image, Model, Tag
 
 
-@pytest.fixture
-def save_path() -> Generator[pathlib.Path, None, None]:
-    dir = pathlib.Path(tempfile.mkdtemp())
-    filename = f'{secrets.token_urlsafe()}.pickle'
-
-    yield dir / filename
-
-    shutil.rmtree(dir)
-
-
-def test_save_and_load(save_path: pathlib.Path):
+def test_save_and_load(basedir: pathlib.Path):
     model = Model()
 
     foo = Image(path=pathlib.Path('foo.jpg'))
@@ -34,6 +17,8 @@ def test_save_and_load(save_path: pathlib.Path):
     model.tags = {red, blue}
 
     current_index = 1
+
+    save_path = basedir / 'save.pickle'
 
     storage.save(save_path, model, current_index=current_index)
     loaded_model, loaded_current_index = storage.load(save_path)

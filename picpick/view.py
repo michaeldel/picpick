@@ -1,66 +1,50 @@
+from __future__ import annotations
+
 import pathlib
 import tkinter as tk
 import tkinter.ttk as ttk
 
 from tkinter import filedialog
-from typing import Dict, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 import PIL
 
 from . import model, widgets
 
+if TYPE_CHECKING:
+    from .controller import Controller
+
 
 class MainWindow(tk.Tk):
-    def __init__(self):
+    def __init__(self, controller: Controller):
         super().__init__()
-        self.controller = Controller()
 
         self.geometry('928x640')
         self.attributes('-type', 'dialog')  # make window floating on i3wm
 
-        self.config(menu=Menu(master=self))
+        self.config(menu=Menu(master=self, controller=controller))
 
         pw = ttk.PanedWindow(master=self, orient=tk.HORIZONTAL)
         pw.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
         image_display = widgets.ImageDisplay(master=pw)
 
-        ppw = ttk.PanedWindow(master=pw, orient=tk.VERTICAL)
+        sidebar = ttk.PanedWindow(master=pw, orient=tk.VERTICAL)
 
-        file_list = FileList(master=ppw, controller=self.controller)
-        tag_list = TagList(master=ppw, controller=self.controller)
+        file_list = FileList(master=sidebar, controller=controller)
+        tag_list = TagList(master=sidebar, controller=controller)
 
         file_list.bind('<<FileListSelect>>', lambda _: self.refresh())
 
-        ppw.add(file_list)
-        ppw.add(tag_list)
+        sidebar.add(file_list)
+        sidebar.add(tag_list)
 
-        pw.add(ppw)
+        pw.add(sidebar)
         pw.add(image_display)
 
-        self._file_list = file_list
-        self._tag_list = tag_list
-        self._image_display = image_display
-
-        self.controller.add_tags(
-            [
-                models.Tag(name=name)
-                for name in (
-                    'red',
-                    'blue',
-                    'green',
-                    'yellow',
-                    'orange',
-                    'pink',
-                    'purple',
-                    'white',
-                    'black',
-                    'grey',
-                    'crimson',
-                )
-            ]
-        )
-        tag_list.refresh(None, self.controller.tags)
+        self.file_list = file_list
+        self.tag_list = tag_list
+        self.image_display = image_display
 
     def refresh(self):
         self._file_list.refresh(self.controller._current_image_index)
@@ -88,35 +72,57 @@ class FileList(tk.Frame):
 
         tree.heading('#0', text="File")
 
-        tree.bind('<<TreeviewSelect>>', lambda _: self.refresh())
+        tree.bind('<<TreeviewSelect>>', lambda _: self._on_select())
 
         self._tree = tree
         self._controller = controller
 
-    def selection(self) -> model.Image:
-        tree_selection = self._tree.selection()
-        assert isinstance(tree_selection, tuple) and len(tree_selection) == 1
+        self._set_items(controller.images)
 
-        # TODO: refactor this properly
-        index = self._tree.item(tree_selection[0])['tags'][0]
-        return self._controller._images[index]
+    def set_current_image(self, image: model.Image):
+        # avoid infinite event callback loop
+        if image == self._current_selected_image:
+            return
 
-    def selection_set(self, index: int):
-        item = self._tree.get_children()[index]
-        self._tree.selection_set(item)
+        key = self._images_index.index(image)
+        for child in self._tree.get_children():
+            tags = self._tree.item(child)['tags']
+            if tags == [key]:
+                break
+        else:
+            raise IndexError
 
-    def refresh(self, selected_index: Optional[int] = None):
-        # clear to prevent duplicates
+        self._tree.selection_set((child,))
+
+    def _reset(self):
         self._tree.delete(*self._tree.get_children())
 
+    def _set_items(self, images: List[model.Image]):
+        assert len(images) > 0
+        self._reset()
+
         ROOT = ''
-        items = list(enumerate(p.name for p in self._controller.images_paths))
-
-        for tag, text in items:
+        for i, image in enumerate(images):
+            text = image.path.name
+            tag = str(i)
             self._tree.insert(ROOT, tk.END, text=text, tags=(tag,))
+        self._images_index = images
 
-        if selected_index is not None:
-            self.selection_set(selected_index)
+    @property
+    def _current_selected_image(self) -> Optional[model.Image]:
+        tree_selection = self._tree.selection()
+
+        if tree_selection == ():  # if no image selected
+            return None
+
+        assert isinstance(tree_selection, tuple) and len(tree_selection) == 1
+
+        key = self._tree.item(tree_selection[0])['tags'][0]
+        return self._images_index[key]
+
+    def _on_select(self):
+        image = self._current_selected_image
+        self._controller.set_current_image(image)
 
 
 class TagList(tk.Frame):
@@ -125,53 +131,66 @@ class TagList(tk.Frame):
         label = tk.Label(master=self, text="Tags")
         label.pack()
 
-        self._controller = controller
         self._checkboxes = []
+        self._checked_variables = []
 
-        self.refresh(None, set())
+        self._controller = controller
 
-    def refresh(self, image: Optional[models.Image], tags: Set[models.Tag]):
-        assert image is None or image.tags.issubset(tags)
+        self._set_tags(controller.tags)
 
-        # clear previous items
+    def set_current_image(self, image: model.Image):
+        assert image.tags.issubset(self._tags)
+
+        for tag, variable in zip(self._tags, self._checked_variables):
+            variable.set(tag in image.tags)
+
+    def _reset(self):
         for checkbox in self._checkboxes:
             checkbox.destroy()
 
-        for tag in sorted(tags, key=lambda t: t.name):
-            text = tag.name
+        self._checkboxes = []
+        self._checked_variables = []
 
-            var = tk.BooleanVar(master=self)
-            var.set(False if image is None else tag in image.tags)
+    def _set_tags(self, tags: List[model.Tag]):
+        self._reset()
 
-            # https://stackoverflow.com/a/3431699/1812262
-            def command(tag=tag, var=var):
-                if var.get():
-                    self._controller.tag_image(image, tag)
+        for tag in tags:
+            variable = tk.BooleanVar(value=False)
+
+            def command(tag: model.Tag = tag, checked: tk.BooleanVar = variable):
+                if checked.get():
+                    self._controller.tag_current_image(tag)
                 else:
-                    self._controller.untag_image(image, tag)
+                    self._controller.untag_current_image(tag)
 
             checkbox = tk.Checkbutton(
                 master=self,
-                text=text,
+                text=tag.name,
                 anchor=tk.W,
-                variable=var,
+                variable=variable,
                 command=command,
-                state=tk.DISABLED if image is None else tk.NORMAL,
             )
             checkbox.pack(fill=tk.X)
+
+            self._tags = tags
             self._checkboxes.append(checkbox)
+            self._checked_variables.append(variable)
 
 
 class Menu(tk.Menu):
-    def __init__(self, master=None):
+    def __init__(self, master, controller: Controller):
         super().__init__(master=master)
+
+        self._controller = controller
 
         file_menu = tk.Menu(self, tearoff=0)
         file_menu.add_command(label="Open...", command=self._open, accelerator="Ctrl+O")
         file_menu.add_command(
             label="Save as...", command=self._save, accelerator="Ctrl+Shift+S"
         )
-        file_menu.add_command(label="Exit", command=master.quit, accelerator="Ctrl+Q")
+        file_menu.add_command(
+            label="Exit", command=master.quit, accelerator="Ctrl+Q"
+        )  # TODO: add confirm
 
         self.add_cascade(label="File", menu=file_menu)
 
@@ -187,8 +206,7 @@ class Menu(tk.Menu):
             return
 
         path = pathlib.Path(filename)
-        self.master.controller.load(path)
-        self.master.refresh()
+        self._controller.load(path)
 
     def _save(self):
         filename = filedialog.asksaveasfilename(
@@ -198,4 +216,4 @@ class Menu(tk.Menu):
             return
 
         path = pathlib.Path(filename)
-        self.master.controller.save(path)
+        self._controller.save(path)

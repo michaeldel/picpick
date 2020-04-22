@@ -2,6 +2,8 @@ import tkinter as tk
 
 from PIL import Image, ImageTk
 
+from . import model
+
 MIN_WIDTH = 128
 MIN_HEIGHT = 128
 
@@ -18,8 +20,8 @@ class ImageDisplay(tk.Canvas):
         self.bind('<Configure>', configure)
         self._image = None
 
-    def set_image(self, image: Image):
-        self._image = image
+    def set_image(self, image: model.Image):
+        self._image = Image.open(image.path)
         self._resize()
 
     def _set_canvas_image(self, image: Image):

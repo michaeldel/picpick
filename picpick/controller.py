@@ -7,10 +7,6 @@ from .model import Image, Model, Tag
 from .view import MainWindow
 
 
-class NoImageError(Exception):
-    pass
-
-
 class Controller:
     def __init__(self, model: Model):
         assert len(model.images) > 0

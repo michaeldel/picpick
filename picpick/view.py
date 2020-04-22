@@ -7,7 +7,7 @@ import tkinter.ttk as ttk
 from tkinter import filedialog
 from typing import List, Optional, TYPE_CHECKING
 
-import PIL
+import PIL  # type: ignore
 
 from . import model, widgets
 
@@ -131,8 +131,8 @@ class TagList(tk.Frame):
         label = tk.Label(master=self, text="Tags")
         label.pack()
 
-        self._checkboxes = []
-        self._checked_variables = []
+        self._checkboxes: List[tk.Checkbutton] = []
+        self._checked_variables: List[tk.BooleanVar] = []
 
         self._controller = controller
 

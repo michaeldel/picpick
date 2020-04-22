@@ -9,6 +9,10 @@ from .view import MainWindow
 
 class Controller:
     def __init__(self, model: Model):
+        # required to comply with static typing
+        self._init(model=model)
+
+    def _init(self, model: Model):
         assert len(model.images) > 0
         assert len(model.tags) > 0
 
@@ -56,7 +60,7 @@ class Controller:
     def load(self, source: pathlib.Path):
         model, current_index = storage.load(source)
 
-        self.__init__(model=model)
+        self._init(model=model)
         self.set_current_image(self.images[current_index])
 
     def run(self):

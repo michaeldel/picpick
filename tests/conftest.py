@@ -2,17 +2,17 @@ import pathlib
 import shutil
 import tempfile
 
-from typing import Callable
+from typing import Callable, Generator
 
-import pytest
+import pytest  # type: ignore
 
-from PIL import Image as PILImage
+from PIL import Image as PILImage  # type: ignore
 
 from picpick.model import Image, Model, Tag
 
 
 @pytest.fixture()
-def basedir() -> pathlib.Path:
+def basedir() -> Generator[pathlib.Path, None, None]:
     dir = pathlib.Path(tempfile.mkdtemp())
     yield dir
     shutil.rmtree(dir)

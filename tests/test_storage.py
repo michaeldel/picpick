@@ -3,14 +3,16 @@ import secrets
 import shutil
 import tempfile
 
-import pytest
+from typing import Generator
+
+import pytest  # type: ignore
 
 from picpick import storage
 from picpick.model import Image, Model, Tag
 
 
 @pytest.fixture
-def save_path() -> pathlib.Path:
+def save_path() -> Generator[pathlib.Path, None, None]:
     dir = pathlib.Path(tempfile.mkdtemp())
     filename = f'{secrets.token_urlsafe()}.pickle'
 
@@ -22,8 +24,8 @@ def save_path() -> pathlib.Path:
 def test_save_and_load(save_path: pathlib.Path):
     model = Model()
 
-    foo = Image(path='foo.jpg')
-    bar = Image(path='bar.jpg')
+    foo = Image(path=pathlib.Path('foo.jpg'))
+    bar = Image(path=pathlib.Path('bar.jpg'))
 
     red = Tag(name='red')
     blue = Tag(name='blue')
@@ -42,5 +44,8 @@ def test_save_and_load(save_path: pathlib.Path):
     assert len(loaded_model.images) == len(model.images) == 2
     assert len(loaded_model.tags) == len(model.tags) == 2
 
-    assert {i.path for i in loaded_model.images} == {'foo.jpg', 'bar.jpg'}
+    assert {i.path for i in loaded_model.images} == {
+        pathlib.Path('foo.jpg'),
+        pathlib.Path('bar.jpg'),
+    }
     assert loaded_model.tags == model.tags == {red, blue}

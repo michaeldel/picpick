@@ -1,12 +1,13 @@
 import pathlib
 
 from dataclasses import dataclass
+from typing import Set
 
 
 class Image:
     def __init__(self, path: pathlib.Path):
         self.path = path  # TODO: set as PK ?
-        self.tags = set()
+        self.tags: Set[Tag] = set()
 
 
 @dataclass(frozen=True)

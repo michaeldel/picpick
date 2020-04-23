@@ -17,6 +17,11 @@ class Controller:
         assert len(model.tags) > 0
 
         self._model = model
+        self._view: MainWindow
+
+        if hasattr(self, '_view'):
+            self._view.destroy()
+
         self._view = MainWindow(controller=self)
 
         self.set_current_image(self.images[0])

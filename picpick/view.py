@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 
@@ -20,7 +21,9 @@ class MainWindow(tk.Tk):
         super().__init__()
 
         self.geometry('928x640')
-        self.attributes('-type', 'dialog')  # make window floating on i3wm
+
+        if sys.platform == 'linux':
+            self.attributes('-type', 'dialog')  # make window floating on i3wm
 
         self.config(menu=Menu(master=self, controller=controller))
 

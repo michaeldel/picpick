@@ -8,8 +8,6 @@ import tkinter.ttk as ttk
 from tkinter import filedialog
 from typing import List, Optional, TYPE_CHECKING
 
-import PIL  # type: ignore
-
 from . import model, widgets
 
 if TYPE_CHECKING:
@@ -37,8 +35,6 @@ class MainWindow(tk.Tk):
         file_list = FileList(master=sidebar, controller=controller)
         tag_list = TagList(master=sidebar, controller=controller)
 
-        file_list.bind('<<FileListSelect>>', lambda _: self.refresh())
-
         sidebar.add(file_list)
         sidebar.add(tag_list)
 
@@ -48,14 +44,6 @@ class MainWindow(tk.Tk):
         self.file_list = file_list
         self.tag_list = tag_list
         self.image_display = image_display
-
-    def refresh(self):
-        self._file_list.refresh(self.controller._current_image_index)
-
-        path = self.controller.current_image.path
-        self._image_display.set_image(PIL.Image.open(path))
-
-        self._tag_list.refresh(self.controller.current_image, self.controller.tags)
 
 
 class FileList(tk.Frame):

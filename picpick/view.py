@@ -18,6 +18,7 @@ class MainWindow(tk.Tk):
     def __init__(self, controller: Controller):
         super().__init__()
 
+        self.title("PicPick")
         self.geometry('928x640')
 
         if sys.platform == 'linux':

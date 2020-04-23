@@ -11,6 +11,8 @@ def test_version():
 def test_tag_some_images(basedir, model: Model):
     controller = Controller(model=model)
 
+    assert controller._view.title() == "PicPick"
+
     # images and tagsmust be ordered alphabetically
     assert [image.path.name for image in controller.images] == [
         'one.jpg',

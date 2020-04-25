@@ -77,8 +77,8 @@ jobs:
         shell: cmd
         run: |
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-          python -m nuitka --standalone --assume-yes-for-downloads --python-flag no_site picpick/__main__.py
+          python -m nuitka --standalone --assume-yes-for-downloads --python-flag no_site picpick
       - uses: actions/upload-artifact@v1
         with:
           name: picpick-win
-          path: __main__.dist
+          path: picpick.dist

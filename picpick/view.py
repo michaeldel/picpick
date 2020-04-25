@@ -146,7 +146,7 @@ class TagList(tk.Frame):
     def _set_tags(self, tags: List[model.Tag]):
         self._reset()
 
-        for tag in tags:
+        for i, tag in enumerate(tags):
             variable = tk.BooleanVar(value=False)
 
             def command(tag: model.Tag = tag, checked: tk.BooleanVar = variable):
@@ -155,14 +155,24 @@ class TagList(tk.Frame):
                 else:
                     self._controller.untag_current_image(tag)
 
+            shortcut: Optional[int]
+
+            if i < 9:
+                shortcut = i + 1
+                text = f"[{shortcut}] {tag.name}"
+            else:
+                shortcut = None
+                text = tag.name
+
             checkbox = tk.Checkbutton(
-                master=self,
-                text=tag.name,
-                anchor=tk.W,
-                variable=variable,
-                command=command,
+                master=self, text=text, anchor=tk.W, variable=variable, command=command,
             )
             checkbox.pack(fill=tk.X)
+
+            if shortcut:
+                root = self.winfo_toplevel()
+                assert isinstance(root, MainWindow)
+                root.bind(str(shortcut), lambda _, cb=checkbox: cb.invoke())
 
             self._tags = tags
             self._checkboxes.append(checkbox)

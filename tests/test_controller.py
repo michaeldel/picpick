@@ -24,9 +24,10 @@ def test_current_image(model: Model):
     assert controller._current_image.path.name == 'one.jpg'
 
 
-# TODO: check view updates
 def test_add_image(image_factory):
+    view = mock.MagicMock()
     controller = Controller(model=Model())
+    controller._view = view
     assert not hasattr(controller, '_current_image')
 
     # adding the first image should automatically set it as current
@@ -34,9 +35,15 @@ def test_add_image(image_factory):
     assert controller._current_image.path.name == 'foo.jpg'
     assert [image.path.name for image in controller.images] == ['foo.jpg']
 
+    view.file_list.set_items.assert_called_once_with(controller.images)
+    view.reset_mock()
+
     controller.add_image(image_factory('bar.jpg'))
     assert controller._current_image.path.name == 'foo.jpg'
     assert [image.path.name for image in controller.images] == ['bar.jpg', 'foo.jpg']
+
+    view.file_list.set_items.assert_called_once_with(controller.images)
+    view.reset_mock()
 
     # adding the same image twice should fail
     with pytest.raises(
@@ -44,6 +51,9 @@ def test_add_image(image_factory):
     ):
         controller.add_image(image_factory('foo.jpg'))
     assert [image.path.name for image in controller.images] == ['bar.jpg', 'foo.jpg']
+
+    view.file_list.set_items.assert_not_called()
+    view.reset_mock()
 
 
 def test_images(image_factory):

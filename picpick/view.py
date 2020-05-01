@@ -203,7 +203,9 @@ class Menu(tk.Menu):
         file_menu.add_command(
             label="Save as...", command=self._save_as, accelerator="Ctrl+Shift+S"
         )
+        file_menu.add_separator()
         file_menu.add_command(label="Add image...", command=self._add_image)
+        file_menu.add_separator()
         file_menu.add_command(
             label="Exit", command=master.quit, accelerator="Ctrl+Q"
         )  # TODO: add confirm

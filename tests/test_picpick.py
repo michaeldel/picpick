@@ -13,7 +13,7 @@ def test_tag_some_images(basedir, model: Model):
 
     assert controller._view.title() == "PicPick *"
 
-    # images and tagsmust be ordered alphabetically
+    # images and tags must be ordered alphabetically
     assert [image.path.name for image in controller.images] == [
         'one.jpg',
         'three.jpg',

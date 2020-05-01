@@ -82,3 +82,24 @@ def test_tag_some_images(basedir, model: Model):
     controller.set_current_image(controller.images[0])
     assert controller.current_image.path.name == 'one.jpg'
     assert controller.current_image.tags == {red, blue}
+
+    # add tags to last image again
+    controller.set_current_image(controller.images[2])
+    assert controller.current_image.path.name == 'two.jpg'
+    assert controller.current_image.tags == set()
+
+    controller.tag_current_image(red)
+    assert controller.current_image.tags == {red}
+
+    # save with save current (not save as) function
+    controller.save_current()
+
+    # remove tag from last image and load again to ensure save worked
+    controller.untag_current_image(red)
+    assert controller.current_image.tags == set()
+
+    controller.load(basedir / 'save.pickle')
+
+    controller.set_current_image(controller.images[2])
+    assert controller.current_image.path.name == 'two.jpg'
+    assert controller.current_image.tags == {red}

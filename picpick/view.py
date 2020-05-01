@@ -24,7 +24,8 @@ class MainWindow(tk.Tk):
         if sys.platform == 'linux':
             self.attributes('-type', 'dialog')  # make window floating on i3wm
 
-        self.config(menu=Menu(master=self, controller=controller))
+        menu = Menu(master=self, controller=controller)
+        self.config(menu=menu)
 
         pw = ttk.PanedWindow(master=self, orient=tk.HORIZONTAL)
         pw.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
@@ -41,6 +42,8 @@ class MainWindow(tk.Tk):
 
         pw.add(sidebar)
         pw.add(image_display)
+
+        self.menu = menu
 
         self.file_list = file_list
         self.tag_list = tag_list
@@ -188,7 +191,10 @@ class Menu(tk.Menu):
         file_menu = tk.Menu(self, tearoff=0)
         file_menu.add_command(label="Open...", command=self._open, accelerator="Ctrl+O")
         file_menu.add_command(
-            label="Save as...", command=self._save, accelerator="Ctrl+Shift+S"
+            label="Save", command=self._save, accelerator="Ctrl+S", state=tk.DISABLED
+        )
+        file_menu.add_command(
+            label="Save as...", command=self._save_as, accelerator="Ctrl+Shift+S"
         )
         file_menu.add_command(
             label="Exit", command=master.quit, accelerator="Ctrl+Q"
@@ -197,8 +203,11 @@ class Menu(tk.Menu):
         self.add_cascade(label="File", menu=file_menu)
 
         master.bind_all('<Control-o>', lambda _: self._open())
-        master.bind_all('<Control-Shift-S>', lambda _: self._save())
+        master.bind_all('<Control-S>', lambda _: self._save())
+        master.bind_all('<Control-Shift-S>', lambda _: self._save_as())
         master.bind_all('<Control-q>', lambda _: master.quit())  # TODO: add confirm
+
+        self._file_menu = file_menu
 
     def _open(self):
         filename = filedialog.askopenfilename(
@@ -210,7 +219,13 @@ class Menu(tk.Menu):
         path = pathlib.Path(filename)
         self._controller.load(path)
 
+    def enable_save(self):
+        self._file_menu.entryconfigure('Save', state=tk.NORMAL)
+
     def _save(self):
+        self._controller.save_current()
+
+    def _save_as(self):
         filename = filedialog.asksaveasfilename(
             filetypes=(("picpick savefile", '.picpick'),)
         )

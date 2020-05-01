@@ -58,9 +58,15 @@ class Controller:
 
         self.current_image.tags.remove(tag)
 
+    def save_current(self):
+        self.save(self.last_save_path)
+
     def save(self, to: pathlib.Path):
         current_index = self.images.index(self.current_image)
         storage.save(to, self._model, current_index=current_index)
+
+        self.last_save_path = to
+        self._view.menu.enable_save()
 
     def load(self, source: pathlib.Path):
         model, current_index = storage.load(source)

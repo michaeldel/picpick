@@ -4,7 +4,21 @@ from picpick import storage
 from picpick.model import Image, Model, Tag
 
 
-def test_save_and_load(basedir: pathlib.Path):
+def test_save_and_load_empty(basedir: pathlib.Path):
+    model = Model()
+    save_path = basedir / 'save.pickle'
+
+    storage.save(save_path, model, current_index=None)
+    loaded_model, loaded_current_index = storage.load(save_path)
+
+    assert loaded_model is not model
+    assert loaded_current_index is None
+
+    assert loaded_model.images == model.images == set()
+    assert loaded_model.tags == model.tags == set()
+
+
+def test_save_and_load_some_images_and_tags(basedir: pathlib.Path):
     model = Model()
 
     foo = Image(path=pathlib.Path('foo.jpg'))

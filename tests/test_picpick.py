@@ -8,6 +8,17 @@ def test_version():
     assert __version__ == '0.1.0'
 
 
+def test_empty_add_one_image_and_tag_it(basedir, image_factory):
+    controller = Controller(model=Model())
+    assert controller._view.title() == "PicPick *"
+    assert controller.images == []
+    assert controller.tags == []
+    assert controller.current_image is None
+
+    controller.save(basedir / 'save.picpick')
+    assert controller._view.title() == "PicPick"
+
+
 def test_tag_some_images(basedir, model: Model):
     controller = Controller(model=model)
 

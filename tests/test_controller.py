@@ -10,6 +10,9 @@ from picpick.model import Model
 
 
 def test_current_image(model: Model):
+    controller = Controller(model=Model())
+    assert controller.current_image is None
+
     controller = Controller(model=model)
 
     assert controller.current_image.path.name == 'one.jpg'
@@ -37,6 +40,19 @@ def test_view_reinitialized_on_load(basedir: pathlib.Path, model: Model):
     # previous window must have been destroyed
     with pytest.raises(tk.TclError, match=r'.* application has been destroyed$'):
         previous.winfo_exists()
+
+
+def test_load_empty_project(basedir: pathlib.Path):
+    model = Model()
+    controller = Controller(model=model)
+
+    controller.save(basedir / 'save.picpick')
+    controller.load(basedir / 'save.picpick')
+    assert controller._model is not model
+
+    assert controller.current_image is None
+    assert controller.images == []
+    assert controller.tags == []
 
 
 def test_mark_view_saved_and_unsaved(basedir: pathlib.Path, model: Model):

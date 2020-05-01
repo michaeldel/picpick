@@ -1,6 +1,6 @@
 import pathlib
 
-from typing import List
+from typing import List, Optional
 
 from . import storage
 from .model import Image, Model, Tag
@@ -13,9 +13,6 @@ class Controller:
         self._init(model=model)
 
     def _init(self, model: Model):
-        assert len(model.images) > 0
-        assert len(model.tags) > 0
-
         self._model = model
         self._view: MainWindow
 
@@ -24,7 +21,8 @@ class Controller:
 
         self._view = MainWindow(controller=self)
 
-        self.set_current_image(self.images[0])
+        if len(model.images) > 0:
+            self.set_current_image(self.images[0])
 
     @property
     def images(self) -> List[Image]:
@@ -35,8 +33,11 @@ class Controller:
         return sorted(self._model.tags, key=lambda tag: tag.name)
 
     @property
-    def current_image(self) -> Image:
-        return self._current_image
+    def current_image(self) -> Optional[Image]:
+        try:
+            return self._current_image
+        except AttributeError:
+            return None
 
     def set_current_image(self, image: Image):
         assert image in self._model.images
@@ -69,7 +70,10 @@ class Controller:
         self.save(self.last_save_path)
 
     def save(self, to: pathlib.Path):
-        current_index = self.images.index(self.current_image)
+        current_index = (
+            self.images.index(self.current_image) if self.current_image else None
+        )
+
         storage.save(to, self._model, current_index=current_index)
 
         self.last_save_path = to
@@ -79,7 +83,9 @@ class Controller:
         model, current_index = storage.load(source)
 
         self._init(model=model)
-        self.set_current_image(self.images[current_index])
+
+        if current_index is not None:
+            self.set_current_image(self.images[current_index])
         self._view.mark_saved()
 
     def run(self):

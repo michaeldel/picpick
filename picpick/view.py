@@ -18,7 +18,7 @@ class MainWindow(tk.Tk):
     def __init__(self, controller: Controller):
         super().__init__()
 
-        self.title("PicPick")
+        self.title("PicPick *")
         self.geometry('928x640')
 
         if sys.platform == 'linux':
@@ -100,7 +100,6 @@ class FileList(tk.Frame):
         self._tree.delete(*self._tree.get_children())
 
     def _set_items(self, images: List[model.Image]):
-        assert len(images) > 0
         self._reset()
 
         ROOT = ''

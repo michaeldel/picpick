@@ -1,6 +1,8 @@
 import pathlib
 import tkinter as tk
 
+from unittest import mock
+
 import pytest  # type: ignore
 
 from picpick.controller import Controller
@@ -35,3 +37,50 @@ def test_view_reinitialized_on_load(basedir: pathlib.Path, model: Model):
     # previous window must have been destroyed
     with pytest.raises(tk.TclError, match=r'.* application has been destroyed$'):
         previous.winfo_exists()
+
+
+def test_mark_view_saved_and_unsaved(basedir: pathlib.Path, model: Model):
+    controller = Controller(model=model)
+    view = mock.MagicMock()
+    controller._view = view
+
+    controller.save(basedir / 'save.picpick')
+    view.mark_saved.assert_called_once_with()
+    view.reset_mock()
+
+    controller.save_current()
+    view.mark_saved.assert_called_once_with()
+    view.reset_mock()
+
+    # setting to new image should mark unsaved
+    controller.set_current_image(controller.images[1])
+    view.mark_unsaved.assert_called_once_with()
+    view.reset_mock()
+
+    controller.save_current()
+    view.mark_saved.assert_called_once_with()
+    view.reset_mock()
+
+    # setting to current image should not mark unsaved
+    controller.set_current_image(controller.current_image)
+    view.mark_unsaved.assert_not_called()
+
+    # tagging an image should mark unsaved
+    tag = controller.tags[0]
+
+    controller.tag_current_image(tag)
+    view.mark_unsaved.assert_called_once_with()
+    view.reset_mock()
+
+    controller.save_current()
+    view.mark_saved.assert_called_once_with()
+    view.reset_mock()
+
+    # untagging an image should mark unsaved
+    controller.untag_current_image(tag)
+    view.mark_unsaved.assert_called_once_with()
+    view.reset_mock()
+
+    controller.save_current()
+    view.mark_saved.assert_called_once_with()
+    view.reset_mock()

@@ -11,7 +11,7 @@ def test_version():
 def test_tag_some_images(basedir, model: Model):
     controller = Controller(model=model)
 
-    assert controller._view.title() == "PicPick"
+    assert controller._view.title() == "PicPick *"
 
     # images and tagsmust be ordered alphabetically
     assert [image.path.name for image in controller.images] == [
@@ -49,6 +49,7 @@ def test_tag_some_images(basedir, model: Model):
 
     # save picking to file
     controller.save(basedir / 'save.pickle')
+    assert controller._view.title() == "PicPick"
 
     # add tags to last image
     controller.set_current_image(controller.images[2])
@@ -57,9 +58,11 @@ def test_tag_some_images(basedir, model: Model):
 
     controller.tag_current_image(blue)
     assert controller.current_image.tags == {blue}
+    assert controller._view.title() == "PicPick *"
 
     # load previous picking and ensure tagging rollbacked
     controller.load(basedir / 'save.pickle')
+    assert controller._view.title() == "PicPick"
 
     # tags an images should be the same
     assert [image.path.name for image in controller.images] == [
@@ -77,6 +80,7 @@ def test_tag_some_images(basedir, model: Model):
     controller.set_current_image(controller.images[2])
     assert controller.current_image.path.name == 'two.jpg'
     assert controller.current_image.tags == set()
+    assert controller._view.title() == "PicPick *"
 
     # first image tags should have remained the same
     controller.set_current_image(controller.images[0])
@@ -93,13 +97,14 @@ def test_tag_some_images(basedir, model: Model):
 
     # save with save current (not save as) function
     controller.save_current()
+    assert controller._view.title() == "PicPick"
 
     # remove tag from last image and load again to ensure save worked
     controller.untag_current_image(red)
     assert controller.current_image.tags == set()
 
     controller.load(basedir / 'save.pickle')
+    assert controller._view.title() == "PicPick"
 
-    controller.set_current_image(controller.images[2])
     assert controller.current_image.path.name == 'two.jpg'
     assert controller.current_image.tags == {red}

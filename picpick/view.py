@@ -43,11 +43,18 @@ class MainWindow(tk.Tk):
         pw.add(sidebar)
         pw.add(image_display)
 
-        self.menu = menu
+        self._menu = menu
 
         self.file_list = file_list
         self.tag_list = tag_list
         self.image_display = image_display
+
+    def mark_unsaved(self):
+        self.title("PicPick *")
+
+    def mark_saved(self):
+        self.title("PicPick")
+        self._menu.enable_save()
 
 
 class FileList(tk.Frame):

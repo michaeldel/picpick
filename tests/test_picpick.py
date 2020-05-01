@@ -18,6 +18,9 @@ def test_empty_add_one_image_and_tag_it(basedir, image_factory):
     controller.save(basedir / 'save.picpick')
     assert controller._view.title() == "PicPick"
 
+    controller.add_image(image_factory('foo.jpg'))
+    assert [image.path.name for image in controller.images] == ['foo.jpg']
+
 
 def test_tag_some_images(basedir, model: Model):
     controller = Controller(model=model)

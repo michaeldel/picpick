@@ -24,6 +24,43 @@ def test_current_image(model: Model):
     assert controller.current_image.path.name == 'one.jpg'
 
 
+# TODO: check view updates
+def test_add_image(image_factory):
+    controller = Controller(model=Model())
+    assert controller.current_image is None
+
+    # adding the first image should automatically set it as current
+    controller.add_image(image_factory('foo.jpg'))
+    assert controller.current_image.path.name == 'foo.jpg'
+    assert [image.path.name for image in controller.images] == ['foo.jpg']
+
+    controller.add_image(image_factory('bar.jpg'))
+    assert controller.current_image.path.name == 'foo.jpg'
+    assert [image.path.name for image in controller.images] == ['bar.jpg', 'foo.jpg']
+
+    # adding the same image twice should fail
+    with pytest.raises(
+        Controller.ImageAlreadyPresent, match="foo.jpg is already present"
+    ):
+        controller.add_image(image_factory('foo.jpg'))
+    assert [image.path.name for image in controller.images] == ['bar.jpg', 'foo.jpg']
+
+
+def test_images(image_factory):
+    controller = Controller(model=Model())
+    assert controller.images == []
+
+    for name in ('foo.jpg', 'bar.jpg', 'baz.jpg'):
+        controller.add_image(image_factory(name))
+
+    # images must be ordered alphabetically
+    assert [image.path.name for image in controller.images] == [
+        'bar.jpg',
+        'baz.jpg',
+        'foo.jpg',
+    ]
+
+
 def test_view_reinitialized_on_load(basedir: pathlib.Path, model: Model):
     controller = Controller(model=model)
 

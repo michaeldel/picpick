@@ -24,6 +24,20 @@ class Controller:
         if len(model.images) > 0:
             self.set_current_image(self.images[0])
 
+    def add_image(self, image: Image):
+        assert image not in self.images
+        assert image.tags == set()
+
+        if image.path in [i.path for i in self.images]:
+            raise self.__class__.ImageAlreadyPresent(image)
+
+        self._model.images.add(image)
+
+        self._view.file_list.set_items(self.images)
+
+        if self.current_image is None:
+            self.set_current_image(image)
+
     @property
     def images(self) -> List[Image]:
         return sorted(self._model.images, key=lambda image: image.path.name)
@@ -90,3 +104,7 @@ class Controller:
 
     def run(self):
         self._view.mainloop()
+
+    class ImageAlreadyPresent(Exception):
+        def __init__(self, image: Image):
+            super().__init__(f"{image.path.name} is already present")

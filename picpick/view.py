@@ -79,7 +79,7 @@ class FileList(tk.Frame):
         self._tree = tree
         self._controller = controller
 
-        self._set_items(controller.images)
+        self.set_items(controller.images)
 
     def set_current_image(self, image: model.Image):
         # avoid infinite event callback loop
@@ -99,7 +99,7 @@ class FileList(tk.Frame):
     def _reset(self):
         self._tree.delete(*self._tree.get_children())
 
-    def _set_items(self, images: List[model.Image]):
+    def set_items(self, images: List[model.Image]):
         self._reset()
 
         ROOT = ''
@@ -183,9 +183,10 @@ class TagList(tk.Frame):
                 assert isinstance(root, MainWindow)
                 root.bind(str(shortcut), lambda _, cb=checkbox: cb.invoke())
 
-            self._tags = tags
             self._checkboxes.append(checkbox)
             self._checked_variables.append(variable)
+
+        self._tags = tags
 
 
 class Menu(tk.Menu):

@@ -68,25 +68,28 @@ class Controller:
 
     def tag_current_image(self, tag: Tag):
         assert tag in self._model.tags
-        assert tag not in self.current_image.tags
+        assert tag not in self._current_image.tags
 
-        self.current_image.tags.add(tag)
+        self._current_image.tags.add(tag)
         self._view.mark_unsaved()
 
     def untag_current_image(self, tag: Tag):
         assert tag in self._model.tags
-        assert tag in self.current_image.tags
+        assert tag in self._current_image.tags
 
-        self.current_image.tags.remove(tag)
+        self._current_image.tags.remove(tag)
         self._view.mark_unsaved()
 
     def save_current(self):
         self.save(self.last_save_path)
 
     def save(self, to: pathlib.Path):
-        current_index = (
-            self.images.index(self.current_image) if self.current_image else None
-        )
+        current_index: Optional[int]
+
+        try:
+            current_index = self.images.index(self._current_image)
+        except AttributeError:
+            current_index = None
 
         storage.save(to, self._model, current_index=current_index)
 

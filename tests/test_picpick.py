@@ -40,6 +40,7 @@ def test_tag_some_images(basedir, model: Model):
     assert controller.tags == [blue, green, red]
 
     # initially selected image is first one
+    assert controller.current_image is not None
     assert controller.current_image.path.name == 'one.jpg'
     assert controller.current_image.tags == set()
 

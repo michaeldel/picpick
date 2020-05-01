@@ -11,31 +11,31 @@ from picpick.model import Model
 
 def test_current_image(model: Model):
     controller = Controller(model=Model())
-    assert controller.current_image is None
+    assert not hasattr(controller, '_current_image')
 
     controller = Controller(model=model)
 
-    assert controller.current_image.path.name == 'one.jpg'
+    assert controller._current_image.path.name == 'one.jpg'
     controller.set_current_image(controller.images[1])
-    assert controller.current_image.path.name == 'three.jpg'
+    assert controller._current_image.path.name == 'three.jpg'
     controller.set_current_image(controller.images[2])
-    assert controller.current_image.path.name == 'two.jpg'
+    assert controller._current_image.path.name == 'two.jpg'
     controller.set_current_image(controller.images[0])
-    assert controller.current_image.path.name == 'one.jpg'
+    assert controller._current_image.path.name == 'one.jpg'
 
 
 # TODO: check view updates
 def test_add_image(image_factory):
     controller = Controller(model=Model())
-    assert controller.current_image is None
+    assert not hasattr(controller, '_current_image')
 
     # adding the first image should automatically set it as current
     controller.add_image(image_factory('foo.jpg'))
-    assert controller.current_image.path.name == 'foo.jpg'
+    assert controller._current_image.path.name == 'foo.jpg'
     assert [image.path.name for image in controller.images] == ['foo.jpg']
 
     controller.add_image(image_factory('bar.jpg'))
-    assert controller.current_image.path.name == 'foo.jpg'
+    assert controller._current_image.path.name == 'foo.jpg'
     assert [image.path.name for image in controller.images] == ['bar.jpg', 'foo.jpg']
 
     # adding the same image twice should fail
@@ -115,7 +115,7 @@ def test_mark_view_saved_and_unsaved(basedir: pathlib.Path, model: Model):
     view.reset_mock()
 
     # setting to current image should not mark unsaved
-    controller.set_current_image(controller.current_image)
+    controller.set_current_image(controller._current_image)
     view.mark_unsaved.assert_not_called()
 
     # tagging an image should mark unsaved

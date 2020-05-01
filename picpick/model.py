@@ -17,5 +17,5 @@ class Tag:
 
 class Model:
     def __init__(self):
-        self.images = set()
-        self.tags = set()
+        self.images: Set[Image] = set()
+        self.tags: Set[Tag] = set()

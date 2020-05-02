@@ -8,7 +8,7 @@ import tkinter.ttk as ttk
 from tkinter import filedialog, messagebox
 from typing import List, Optional, TYPE_CHECKING
 
-from . import model, widgets
+from . import dialogs, model, widgets
 
 if TYPE_CHECKING:  # required to prevent circular imports
     from .controller import Controller
@@ -36,9 +36,17 @@ class MainWindow(tk.Tk):
 
         file_list = FileList(master=sidebar, controller=controller)
         tag_list = TagList(master=sidebar, controller=controller)
+        tag_manager_button = tk.Button(
+            master=sidebar,
+            text="Manage tags",
+            command=lambda: dialogs.TagsManagerDialog(
+                master=self, controller=controller
+            ),
+        )
 
         sidebar.add(file_list)
         sidebar.add(tag_list)
+        sidebar.add(tag_manager_button)
 
         pw.add(sidebar)
         pw.add(image_display)

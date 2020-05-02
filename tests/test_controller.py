@@ -139,28 +139,38 @@ def test_delete_tag(model_factory):
     view.reset_mock()
 
 
-def test_update_tag(image_factory):
-    model = Model()
-
-    image = image_factory("foo.jpg")
-
-    model.tags = {Tag(name="foo"), Tag(name="bar")}
-    model.images = {image}
-
-    image.tags = {Tag(name="foo"), Tag(name="bar")}
-
-    controller = Controller(model=model)
+def test_update_tag(model_factory):
+    controller = Controller(model_factory((), ("foo",)))
+    assert controller.tags == [Tag(name="foo")]
 
     view = mock.MagicMock()
+    controller._view = view
+
+    controller.update_tag(old=Tag(name="foo"), new=Tag(name="bar"))
+    assert controller._model.tags == {Tag(name="bar")}
+
+    view.tag_list.set_tags.assert_called_once_with([Tag(name="bar")])
+
+    # no loaded image, hence should not update it
+    view.tag_list.set_current_image.assert_not_called()
+
+    view.mark_unsaved.assert_called_once()
+    view.reset_mock()
+
+    controller = Controller(model_factory(('pic.jpg',), ("foo", "bar")))
+    controller.current_image.tags = {Tag(name="foo"), Tag(name="bar")}
+
     controller._view = view
 
     controller.update_tag(Tag(name="bar"), Tag(name="qux"))
     assert controller.tags == [Tag(name="foo"), Tag(name="qux")]
 
-    assert model.tags == {Tag(name="foo"), Tag(name="qux")}
-    assert image.tags == {Tag(name="foo"), Tag(name="qux")}
+    assert controller._model.tags == {Tag(name="foo"), Tag(name="qux")}
+    assert controller.current_image.tags == {Tag(name="foo"), Tag(name="qux")}
 
     view.tag_list.set_tags.assert_called_once_with([Tag(name="foo"), Tag(name="qux")])
+    view.tag_list.set_current_image.assert_called_once_with(controller.current_image)
+    view.mark_unsaved.assert_called_once()
     view.reset_mock()
 
     with pytest.raises(
@@ -170,10 +180,12 @@ def test_update_tag(image_factory):
 
     assert controller.tags == [Tag(name="foo"), Tag(name="qux")]
 
-    assert model.tags == {Tag(name="foo"), Tag(name="qux")}
-    assert image.tags == {Tag(name="foo"), Tag(name="qux")}
+    assert controller._model.tags == {Tag(name="foo"), Tag(name="qux")}
+    assert controller.current_image.tags == {Tag(name="foo"), Tag(name="qux")}
 
     view.tag_list.set_tags.assert_not_called()
+    view.tag_list.set_current_image.assert_not_called()
+    view.mark_unsaved.assert_not_called()
     view.reset_mock()
 
 

@@ -8,6 +8,35 @@ def test_version():
     assert __version__ == '0.1.0'
 
 
+def test_empty_add_some_tags(basedir):
+    controller = Controller(model=Model())
+    assert controller._view.title() == "PicPick *"
+    assert controller.images == []
+    assert controller.tags == []
+    assert controller.current_image is None
+
+    # just want to add some tags
+    for name in ("alpha", "beta", "gamma"):
+        controller.add_tag(Tag(name=name))
+    assert controller.tags == [Tag(name="alpha"), Tag(name="beta"), Tag(name="gamma")]
+
+    controller.save(basedir / 'save.picpick')
+    assert controller._view.title() == "PicPick"
+
+    # eventually wants to remove beta
+    controller.delete_tag(Tag(name="beta"))
+    assert controller.tags == [Tag(name="alpha"), Tag(name="gamma")]
+
+    assert controller._view.title() == "PicPick *"
+    controller.save(basedir / 'save.picpick')
+    assert controller._view.title() == "PicPick"
+
+    # renames alpha to delta
+    controller.update_tag(old=Tag(name="alpha"), new=Tag(name="delta"))
+    assert controller.tags == [Tag(name="delta"), Tag(name="gamma")]
+    assert controller._view.title() == "PicPick *"
+
+
 def test_empty_add_one_image_and_tag_it(basedir, image_factory):
     controller = Controller(model=Model())
     assert controller._view.title() == "PicPick *"

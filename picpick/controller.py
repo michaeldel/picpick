@@ -71,6 +71,10 @@ class Controller:
                 image.tags.add(new)
 
         self._view.tag_list.set_tags(self.tags)
+        if hasattr(self, '_current_image'):
+            self._view.tag_list.set_current_image(self._current_image)
+
+        self._view.mark_unsaved()
 
     @property
     def images(self) -> List[Image]:

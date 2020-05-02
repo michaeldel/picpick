@@ -131,7 +131,8 @@ class FileList(tk.Frame):
 
     def _on_select(self):
         image = self._current_selected_image
-        self._controller.set_current_image(image)
+        if image is not None:
+            self._controller.set_current_image(image)
 
 
 class TagList(tk.Frame):

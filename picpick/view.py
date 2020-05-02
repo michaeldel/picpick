@@ -45,8 +45,8 @@ class MainWindow(tk.Tk):
         )
 
         sidebar.add(file_list)
-        sidebar.add(tag_list)
         sidebar.add(tag_manager_button)
+        sidebar.add(tag_list)
 
         pw.add(sidebar)
         pw.add(image_display)

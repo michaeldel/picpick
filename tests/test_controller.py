@@ -90,6 +90,31 @@ def test_add_tag():
     assert controller.tags == [Tag(name="bar"), Tag(name="foo")]
 
 
+def test_delete_tag():
+    view = mock.MagicMock()
+    controller = Controller(model=Model())
+
+    controller.add_tag(Tag(name="foo"))
+    controller.add_tag(Tag(name="bar"))
+
+    assert controller.tags == [Tag(name="bar"), Tag(name="foo")]
+
+    view = mock.MagicMock()
+    controller._view = view
+
+    controller.delete_tag(Tag(name="foo"))
+    assert controller.tags == [Tag(name="bar")]
+
+    view.tag_list.set_tags.assert_called_once_with([Tag(name="bar")])
+    view.reset_mock()
+
+    controller.delete_tag(Tag(name="bar"))
+    assert controller.tags == []
+
+    view.tag_list.set_tags.assert_called_once_with([])
+    view.reset_mock()
+
+
 def test_tags():
     controller = Controller(model=Model())
     assert controller.tags == []

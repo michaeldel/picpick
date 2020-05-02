@@ -40,6 +40,15 @@ def test_empty_add_one_image_and_tag_it(basedir, image_factory):
     controller.save(basedir / 'save.picpick')
     assert controller._view.title() == "PicPick"
 
+    # eventually wants to rename the first tag and delete the second
+    controller.update_tag(old=Tag(name="alpha"), new=Tag(name="gamma"))
+    controller.delete_tag(Tag(name="beta"))
+
+    assert controller.tags == ["gamma"]
+
+    # image tags must have also been updated
+    assert controller.current_image.tags == {Tag(name="gamma")}
+
 
 def test_tag_some_images(basedir, model: Model):
     controller = Controller(model=model)

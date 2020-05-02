@@ -44,6 +44,10 @@ class Controller:
         self._model.tags.add(tag)
         self._view.tag_list.set_tags(self.tags)
 
+    def delete_tag(self, tag: Tag):
+        self._model.tags.remove(tag)
+        self._view.tag_list.set_tags(self.tags)
+
     @property
     def images(self) -> List[Image]:
         return sorted(self._model.images, key=lambda image: image.path.name)

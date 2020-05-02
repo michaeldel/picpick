@@ -25,7 +25,7 @@ class Controller:
             self.set_current_image(self.images[0])
 
     def add_image(self, image: Image):
-        assert image not in self.images
+        assert image not in self.images  # TODO: performance can be improved
         assert image.tags == set()
 
         if image.path in [i.path for i in self.images]:

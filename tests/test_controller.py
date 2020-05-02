@@ -104,6 +104,8 @@ def test_delete_tag(model_factory):
 
     # no loaded image, hence should not update it
     view.tag_list.set_current_image.assert_not_called()
+
+    view.mark_unsaved.assert_called_once()
     view.reset_mock()
 
     controller = Controller(model_factory(('pic.jpg',), ("foo", "bar")))
@@ -122,6 +124,7 @@ def test_delete_tag(model_factory):
 
     view.tag_list.set_tags.assert_called_once_with([Tag(name="bar")])
     view.tag_list.set_current_image.assert_called_once_with(controller.current_image)
+    view.mark_unsaved.assert_called_once()
     view.reset_mock()
 
     controller.delete_tag(Tag(name="bar"))
@@ -132,6 +135,7 @@ def test_delete_tag(model_factory):
 
     view.tag_list.set_tags.assert_called_once_with([])
     view.tag_list.set_current_image.assert_called_once_with(controller.current_image)
+    view.mark_unsaved.assert_called_once()
     view.reset_mock()
 
 

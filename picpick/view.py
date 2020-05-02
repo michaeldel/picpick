@@ -212,7 +212,7 @@ class Menu(tk.Menu):
             label="Save as...", command=self._save_as, accelerator="Ctrl+Shift+S"
         )
         file_menu.add_separator()
-        file_menu.add_command(label="Add image...", command=self._add_image)
+        file_menu.add_command(label="Add images...", command=self._add_image)
         file_menu.add_separator()
         file_menu.add_command(
             label="Exit", command=master.quit, accelerator="Ctrl+Q"
@@ -254,17 +254,24 @@ class Menu(tk.Menu):
         self._controller.save(path)
 
     def _add_image(self):
-        filename = filedialog.askopenfilename(
+        filenames = filedialog.askopenfilenames(
             filetypes=(("image file", '.jpg .jpeg .png .bmp .pgm .pbm .ppm'),)
         )
-        if filename == () or filename == '':
+        if filenames == () or filenames == '':
             return
-
-        path = pathlib.Path(filename)
 
         from .controller import Controller
 
-        try:
-            self._controller.add_image(model.Image(path=path))
-        except Controller.ImageAlreadyPresent as e:
-            messagebox.showerror("Add image error", e)
+        errored = False
+
+        for filename in filenames:
+            path = pathlib.Path(filename)
+            try:
+                self._controller.add_image(model.Image(path=path))
+            except Controller.ImageAlreadyPresent:
+                errored = True
+
+        if errored:
+            messagebox.showwarning(
+                "Images already present", "Some images were already present"
+            )

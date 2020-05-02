@@ -2,7 +2,7 @@ import pathlib
 import shutil
 import tempfile
 
-from typing import Callable, Generator
+from typing import Callable, Collection, Generator, Protocol
 
 import pytest  # type: ignore
 
@@ -28,13 +28,29 @@ def image_factory(basedir) -> Callable[[str], Image]:
     return inner
 
 
+class ModelFactory(Protocol):
+    def __call__(
+        self, *, filenames: Collection[str], tagnames: Collection[str]
+    ) -> Model:
+        ...
+
+
 @pytest.fixture
-def model(image_factory) -> Model:
-    m = Model()
+def model_factory(image_factory) -> ModelFactory:
+    def inner(
+        filenames: Collection[str] = None, tagnames: Collection[str] = None
+    ) -> Model:
+        model = Model()
 
-    for filename in ('one.jpg', 'two.jpg', 'three.jpg'):
-        m.images.add(image_factory(filename))
-    for tagname in ('red', 'green', 'blue'):
-        m.tags.add(Tag(name=tagname))
+        for filename in filenames or []:
+            model.images.add(image_factory(filename))
+        for tagname in tagnames or []:
+            model.tags.add(Tag(name=tagname))
+        return model
 
-    return m
+    return inner
+
+
+@pytest.fixture
+def model(model_factory) -> Model:
+    return model_factory(('one.jpg', 'two.jpg', 'three.jpg'), ('red', 'green', 'blue'))

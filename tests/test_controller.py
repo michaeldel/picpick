@@ -90,38 +90,48 @@ def test_add_tag():
     assert controller.tags == [Tag(name="bar"), Tag(name="foo")]
 
 
-def test_delete_tag(image_factory):
-    model = Model()
-    image = image_factory("foo.jpg")
-
-    model.tags = {Tag(name="foo"), Tag(name="bar")}
-    model.images = {image}
-
-    image.tags = {Tag(name="foo"), Tag(name="bar")}
-
-    controller = Controller(model=model)
-
-    assert controller.tags == [Tag(name="bar"), Tag(name="foo")]
+def test_delete_tag(model_factory):
+    controller = Controller(model_factory((), ("foo",)))
+    assert controller.tags == [Tag(name="foo")]
 
     view = mock.MagicMock()
     controller._view = view
 
     controller.delete_tag(Tag(name="foo"))
+    assert controller._model.tags == set()
+
+    view.tag_list.set_tags.assert_called_once_with([])
+
+    # no loaded image, hence should not update it
+    view.tag_list.set_current_image.assert_not_called()
+    view.reset_mock()
+
+    controller = Controller(model_factory(('pic.jpg',), ("foo", "bar")))
+    assert controller.current_image is not None
+    assert controller.tags == [Tag(name="bar"), Tag(name="foo")]
+
+    controller.current_image.tags = {Tag(name="foo"), Tag(name="bar")}
+
+    controller._view = view
+
+    controller.delete_tag(Tag(name="foo"))
     assert controller.tags == [Tag(name="bar")]
 
-    assert model.tags == {Tag(name="bar")}
-    assert image.tags == {Tag(name="bar")}
+    assert controller._model.tags == {Tag(name="bar")}
+    assert controller.current_image.tags == {Tag(name="bar")}
 
     view.tag_list.set_tags.assert_called_once_with([Tag(name="bar")])
+    view.tag_list.set_current_image.assert_called_once_with(controller.current_image)
     view.reset_mock()
 
     controller.delete_tag(Tag(name="bar"))
     assert controller.tags == []
 
-    assert model.tags == set()
-    assert image.tags == set()
+    assert controller._model.tags == set()
+    assert controller.current_image.tags == set()
 
     view.tag_list.set_tags.assert_called_once_with([])
+    view.tag_list.set_current_image.assert_called_once_with(controller.current_image)
     view.reset_mock()
 
 

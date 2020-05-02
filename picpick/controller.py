@@ -51,6 +51,8 @@ class Controller:
             image.tags.discard(tag)
 
         self._view.tag_list.set_tags(self.tags)
+        if hasattr(self, '_current_image'):
+            self._view.tag_list.set_current_image(self._current_image)
 
     def update_tag(self, old: Tag, new: Tag):
         assert old in self._model.tags

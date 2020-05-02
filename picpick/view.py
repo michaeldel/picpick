@@ -10,7 +10,7 @@ from typing import List, Optional, TYPE_CHECKING
 
 from . import model, widgets
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # required to prevent circular imports
     from .controller import Controller
 
 

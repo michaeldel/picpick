@@ -48,6 +48,22 @@ class Controller:
         self._model.tags.remove(tag)
         self._view.tag_list.set_tags(self.tags)
 
+    def update_tag(self, old: Tag, new: Tag):
+        assert old in self._model.tags
+
+        if new in self._model.tags:
+            raise self.__class__.TagAlreadyPresent(new)
+
+        self._model.tags.remove(old)
+        self._model.tags.add(new)
+
+        for image in self._model.images:
+            if old in image.tags:
+                image.tags.remove(old)
+                image.tags.add(new)
+
+        self._view.tag_list.set_tags(self.tags)
+
     @property
     def images(self) -> List[Image]:
         return sorted(self._model.images, key=lambda image: image.path.name)
@@ -121,3 +137,7 @@ class Controller:
     class ImageAlreadyPresent(Exception):
         def __init__(self, image: Image):
             super().__init__(f"{image.path.name} is already present")
+
+    class TagAlreadyPresent(Exception):
+        def __init__(self, tag: Tag):
+            super().__init__(f"\"{tag.name}\" tag is already present")

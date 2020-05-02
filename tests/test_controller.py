@@ -115,6 +115,44 @@ def test_delete_tag():
     view.reset_mock()
 
 
+def test_update_tag(image_factory):
+    model = Model()
+
+    image = image_factory("foo.jpg")
+
+    model.tags = {Tag(name="foo"), Tag(name="bar")}
+    model.images = {image}
+
+    image.tags = {Tag(name="foo"), Tag(name="bar")}
+
+    controller = Controller(model=model)
+
+    view = mock.MagicMock()
+    controller._view = view
+
+    controller.update_tag(Tag(name="bar"), Tag(name="qux"))
+    assert controller.tags == [Tag(name="foo"), Tag(name="qux")]
+
+    assert model.tags == {Tag(name="foo"), Tag(name="qux")}
+    assert image.tags == {Tag(name="foo"), Tag(name="qux")}
+
+    view.tag_list.set_tags.assert_called_once_with([Tag(name="foo"), Tag(name="qux")])
+    view.reset_mock()
+
+    with pytest.raises(
+        Controller.TagAlreadyPresent, match="\"qux\" tag is already present"
+    ):
+        controller.update_tag(Tag(name="foo"), Tag(name="qux"))
+
+    assert controller.tags == [Tag(name="foo"), Tag(name="qux")]
+
+    assert model.tags == {Tag(name="foo"), Tag(name="qux")}
+    assert image.tags == {Tag(name="foo"), Tag(name="qux")}
+
+    view.tag_list.set_tags.assert_not_called()
+    view.reset_mock()
+
+
 def test_tags():
     controller = Controller(model=Model())
     assert controller.tags == []

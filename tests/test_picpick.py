@@ -21,6 +21,25 @@ def test_empty_add_one_image_and_tag_it(basedir, image_factory):
     controller.add_image(image_factory('foo.jpg'))
     assert [image.path.name for image in controller.images] == ['foo.jpg']
 
+    controller.add_tag(Tag(name='alpha'))
+    controller.add_tag(Tag(name='beta'))
+    assert controller.tags == [Tag(name='alpha'), Tag(name='beta')]
+
+    assert controller._view.title() == "PicPick *"
+    controller.save(basedir / 'save.picpick')
+    assert controller._view.title() == "PicPick"
+
+    assert controller.current_image.path.name == 'foo.jpg'
+    assert controller.current_image.tags == set()
+
+    controller.tag_current_image(Tag(name='alpha'))
+    controller.tag_current_image(Tag(name='beta'))
+    assert controller.current_image.tags == {Tag(name='alpha'), Tag(name='beta')}
+
+    assert controller._view.title() == "PicPick *"
+    controller.save(basedir / 'save.picpick')
+    assert controller._view.title() == "PicPick"
+
 
 def test_tag_some_images(basedir, model: Model):
     controller = Controller(model=model)

@@ -137,7 +137,7 @@ class TagList(tk.Frame):
 
         self._controller = controller
 
-        self._set_tags(controller.tags)
+        self.set_tags(controller.tags)
 
     def set_current_image(self, image: model.Image):
         assert image.tags.issubset(self._tags)
@@ -152,7 +152,7 @@ class TagList(tk.Frame):
         self._checkboxes = []
         self._checked_variables = []
 
-    def _set_tags(self, tags: List[model.Tag]):
+    def set_tags(self, tags: List[model.Tag]):
         self._reset()
 
         for i, tag in enumerate(tags):

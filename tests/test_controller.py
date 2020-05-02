@@ -6,7 +6,7 @@ from unittest import mock
 import pytest  # type: ignore
 
 from picpick.controller import Controller
-from picpick.model import Model
+from picpick.model import Model, Tag
 
 
 def test_current_image(model: Model):
@@ -68,6 +68,44 @@ def test_images(image_factory):
         'bar.jpg',
         'baz.jpg',
         'foo.jpg',
+    ]
+
+
+def test_add_tag():
+    view = mock.MagicMock()
+    controller = Controller(model=Model())
+    controller._view = view
+    assert controller.tags == []
+
+    controller.add_tag(Tag(name="foo"))
+
+    view.tag_list.set_tags.assert_called_once_with([Tag(name="foo")])
+    view.reset_mock()
+
+    controller.add_tag(Tag(name="bar"))
+
+    view.tag_list.set_tags.assert_called_once_with([Tag(name="bar"), Tag(name="foo")])
+    view.reset_mock()
+
+    assert controller.tags == [Tag(name="bar"), Tag(name="foo")]
+
+
+def test_tags():
+    controller = Controller(model=Model())
+    assert controller.tags == []
+
+    controller.add_tag(Tag(name="red"))
+    assert controller.tags == [Tag(name="red")]
+
+    controller.add_tag(Tag(name="blue"))
+    controller.add_tag(Tag(name="green"))
+    controller.add_tag(Tag(name="yellow"))
+
+    assert controller.tags == [
+        Tag(name="blue"),
+        Tag(name="green"),
+        Tag(name="red"),
+        Tag(name="yellow"),
     ]
 
 

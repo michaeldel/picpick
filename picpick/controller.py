@@ -38,6 +38,12 @@ class Controller:
         if self.current_image is None:
             self.set_current_image(image)
 
+    def add_tag(self, tag: Tag):
+        assert tag not in self._model.tags
+
+        self._model.tags.add(tag)
+        self._view.tag_list.set_tags(self.tags)
+
     @property
     def images(self) -> List[Image]:
         return sorted(self._model.images, key=lambda image: image.path.name)

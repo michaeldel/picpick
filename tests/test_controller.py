@@ -90,12 +90,16 @@ def test_add_tag():
     assert controller.tags == [Tag(name="bar"), Tag(name="foo")]
 
 
-def test_delete_tag():
-    view = mock.MagicMock()
-    controller = Controller(model=Model())
+def test_delete_tag(image_factory):
+    model = Model()
+    image = image_factory("foo.jpg")
 
-    controller.add_tag(Tag(name="foo"))
-    controller.add_tag(Tag(name="bar"))
+    model.tags = {Tag(name="foo"), Tag(name="bar")}
+    model.images = {image}
+
+    image.tags = {Tag(name="foo"), Tag(name="bar")}
+
+    controller = Controller(model=model)
 
     assert controller.tags == [Tag(name="bar"), Tag(name="foo")]
 
@@ -105,11 +109,17 @@ def test_delete_tag():
     controller.delete_tag(Tag(name="foo"))
     assert controller.tags == [Tag(name="bar")]
 
+    assert model.tags == {Tag(name="bar")}
+    assert image.tags == {Tag(name="bar")}
+
     view.tag_list.set_tags.assert_called_once_with([Tag(name="bar")])
     view.reset_mock()
 
     controller.delete_tag(Tag(name="bar"))
     assert controller.tags == []
+
+    assert model.tags == set()
+    assert image.tags == set()
 
     view.tag_list.set_tags.assert_called_once_with([])
     view.reset_mock()

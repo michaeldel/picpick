@@ -46,6 +46,10 @@ class Controller:
 
     def delete_tag(self, tag: Tag):
         self._model.tags.remove(tag)
+
+        for image in self._model.images:
+            image.tags.discard(tag)
+
         self._view.tag_list.set_tags(self.tags)
 
     def update_tag(self, old: Tag, new: Tag):

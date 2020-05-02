@@ -5,7 +5,7 @@ import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from typing import List, Optional, TYPE_CHECKING
 
 from . import model, widgets
@@ -253,4 +253,10 @@ class Menu(tk.Menu):
             return
 
         path = pathlib.Path(filename)
-        self._controller.add_image(model.Image(path=path))
+
+        from .controller import Controller
+
+        try:
+            self._controller.add_image(model.Image(path=path))
+        except Controller.ImageAlreadyPresent as e:
+            messagebox.showerror("Add image error", e)

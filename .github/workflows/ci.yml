@@ -75,7 +75,10 @@ jobs:
         run: pip install nuitka
       - name: Build executable
         shell: cmd
+        # need hack to make nuitka run module
+        # cf https://github.com/Nuitka/Nuitka/issues/493#issuecomment-522979412
         run: |
+          echo "from picpick import __main__" >> picpick.py
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
           python -m nuitka --standalone --assume-yes-for-downloads --python-flag no_site picpick
       - uses: actions/upload-artifact@v1

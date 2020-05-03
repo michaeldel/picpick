@@ -89,7 +89,7 @@ jobs:
             picpick.py
       - name: Check executable running as expected
         shell: bash
-        run: ./picpick.dist/picpick.exe --version | grep -P '^\d+.\d+.\d+$'
+        run: ./picpick.dist/picpick.exe --version | LC_ALL=en_US.utf8 grep -P '^\d+.\d+.\d+$'
       - uses: actions/upload-artifact@v1
         with:
           name: picpick-win

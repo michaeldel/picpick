@@ -86,6 +86,7 @@ jobs:
             --experimental=use_pefile_recurse ^
             --python-flag no_site ^
             picpick.py
+          call "picpick.dist\picpick.exe"
       - uses: actions/upload-artifact@v1
         with:
           name: picpick-win

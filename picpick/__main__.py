@@ -10,7 +10,7 @@ from .model import Model
 
 @click.command()
 @click.argument('filename', type=click.Path(exists=True), required=False)
-def empty(filename: Optional[str]):
+def run(filename: Optional[str]):
     model = Model()
     controller = Controller(model=model)
 
@@ -20,4 +20,4 @@ def empty(filename: Optional[str]):
     controller.run()
 
 
-empty()
+run()

@@ -12,48 +12,45 @@ on:
 jobs:
   CI:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.8
-    - name: Install and configure poetry
-      run: |
-        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-        source $HOME/.poetry/env
-        poetry config virtualenvs.create false
-    - name: Install virtual display
-      run: |
-        sudo apt-get update
-        sudo apt-get install xvfb
-    - name: Install dependencies
-      run: |
-        source $HOME/.poetry/env
-        python -m pip install --upgrade pip
-        poetry install --no-root
-    - name: Lint with flake8 and black
-      run: |
-        source $HOME/.poetry/env
-        black --check .
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Typecheck with mypy
-      run: |
-        source $HOME/.poetry/env
-        mypy .
-    - name: Test with pytest
-      run: |
-        source $HOME/.poetry/env
-        xvfb-run --auto-servernum pytest
-
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install and configure poetry
+        run: |
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+          source $HOME/.poetry/env
+          poetry config virtualenvs.create false
+      - name: Install virtual display
+        run: |
+          sudo apt-get update
+          sudo apt-get install xvfb
+      - name: Install dependencies
+        run: |
+          source $HOME/.poetry/env
+          python -m pip install --upgrade pip
+          poetry install --no-root
+      - name: Lint with flake8 and black
+        run: |
+          source $HOME/.poetry/env
+          black --check .
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Typecheck with mypy
+        run: |
+          source $HOME/.poetry/env
+          mypy .
+      - name: Test with pytest
+        run: |
+          source $HOME/.poetry/env
+          xvfb-run --auto-servernum pytest
   Build:
     needs: CI
     runs-on: windows-latest
-
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.8
@@ -62,35 +59,31 @@ jobs:
           python-version: 3.8
       - name: Install and configure poetry
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install poetry
+          $ErrorView = "NormalView"
+          (Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -UseBasicParsing).Content | python
+          $Env:Path += ";$Env:UserProfile/.poetry/bin"
 
           poetry --version
           poetry config virtualenvs.create false
+
+          echo "::set-env name=Path::$Env:Path"
       - name: Install dependencies
         run: |
+          echo "$Env:Path"
           python -m pip install --upgrade pip
           poetry install --no-root
-      - name: Install nuitka
-        # TODO: move back to release once nuitka updated
-        run: python -m pip install https://github.com/Nuitka/Nuitka/archive/82d2da2f639483ae9b74ad7a765a66e45ab367c3.zip
-      - name: Build executable
-        shell: cmd
-        # need hack to make nuitka run module
-        # cf https://github.com/Nuitka/Nuitka/issues/493#issuecomment-522979412
+      - name: Install pyinstaller
         run: |
-          echo "from picpick import __main__" > picpick.py
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" amd64
-          python -m nuitka --standalone ^
-            --assume-yes-for-downloads ^
-            --windows-dependency-tool=pefile ^
-            --experimental=use_pefile_recurse ^
-            --python-flag no_site ^
-            picpick.py
+          python -m pip install pyinstaller
+      - name: Build executable
+        run: |
+          $ErrorView = "NormalView"
+          make build
       - name: Check executable running as expected
-        shell: bash
-        run: ./picpick.dist/picpick.exe --version | LC_ALL=en_US.utf8 grep -P '^\d+.\d+.\d+$'
+        run: |
+          $output = ./dist/picpick/picpick.exe --version
+          $output -Match '^\d+.\d+.\d+$'
       - uses: actions/upload-artifact@v1
         with:
           name: picpick-win
-          path: picpick.dist
+          path: dist/picpick

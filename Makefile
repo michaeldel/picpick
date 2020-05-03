@@ -9,5 +9,13 @@ lint:
 test:
 	pytest
 
-.PHONY: run lint test
+build:
+	echo 'import picpick.__main__' > executable.py
+	pyinstaller -y executable.py --name picpick
+
+clean:
+	rm -rf build dist executable.spec executable.py
+
+
+.PHONY: build clean run lint test
 

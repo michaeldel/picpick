@@ -73,7 +73,7 @@ jobs:
           poetry install --no-root
       - name: Install nuitka
         # TODO: move back to release once nuitka updated
-        run: pip install https://github.com/Nuitka/Nuitka/archive/82d2da2f639483ae9b74ad7a765a66e45ab367c3.zip
+        run: python -m pip install https://github.com/Nuitka/Nuitka/archive/82d2da2f639483ae9b74ad7a765a66e45ab367c3.zip
       - name: Build executable
         shell: cmd
         # need hack to make nuitka run module

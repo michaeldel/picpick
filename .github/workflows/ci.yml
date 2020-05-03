@@ -87,7 +87,9 @@ jobs:
             --experimental=use_pefile_recurse ^
             --python-flag no_site ^
             picpick.py
-          call "picpick.dist\picpick.exe"
+      - name: Check executable running as expected
+        shell: bash
+        run: ./picpick.dist/picpick.exe --version | grep -P '^\d+.\d+.\d+$'
       - uses: actions/upload-artifact@v1
         with:
           name: picpick-win

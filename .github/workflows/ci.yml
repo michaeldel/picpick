@@ -80,7 +80,12 @@ jobs:
         run: |
           echo "from picpick import __main__" > picpick.py
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x86_amd64
-          python -m nuitka --standalone --assume-yes-for-downloads --python-flag no_site picpick.py
+          python -m nuitka --standalone ^
+            --assume-yes-for-downloads ^
+            --windows-dependency-tool=pefile ^
+            --experimental=use_pefile_recurse ^
+            --python-flag no_site ^
+            picpick.py
       - uses: actions/upload-artifact@v1
         with:
           name: picpick-win

@@ -222,7 +222,7 @@ class Menu(tk.Menu):
         self.add_cascade(label="File", menu=file_menu)
 
         master.bind_all('<Control-o>', lambda _: self._open())
-        master.bind_all('<Control-S>', lambda _: self._save())
+        master.bind_all('<Control-s>', lambda _: self._save())
         master.bind_all('<Control-Shift-S>', lambda _: self._save_as())
         master.bind_all('<Control-q>', lambda _: master.quit())  # TODO: add confirm
 
@@ -242,7 +242,9 @@ class Menu(tk.Menu):
         self._file_menu.entryconfigure('Save', state=tk.NORMAL)
 
     def _save(self):
-        self._controller.save_current()
+        if hasattr(self._controller, 'last_save_path'):
+            self._controller.save_current()
+        self._save_as()
 
     def _save_as(self):
         filename = filedialog.asksaveasfilename(

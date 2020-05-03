@@ -119,6 +119,7 @@ class Controller:
         self._view.mark_unsaved()
 
     def save_current(self):
+        assert hasattr(self, 'last_save_path')
         self.save(self.last_save_path)
 
     def save(self, to: pathlib.Path):

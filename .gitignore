@@ -1,2 +1,8 @@
 __pycache__
 .mypy_cache
+
+build/
+dist/
+
+executable.py
+picpick.spec

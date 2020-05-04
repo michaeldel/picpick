@@ -14,7 +14,7 @@ build:
 	pyinstaller -y executable.py --name picpick
 
 clean:
-	rm -rf build dist executable.spec executable.py
+	rm -rf build dist executable.spec picpick.py
 
 
 .PHONY: build clean run lint test

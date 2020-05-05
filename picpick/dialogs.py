@@ -4,6 +4,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import sys
 
+from tkinter import messagebox
 from typing import List, TYPE_CHECKING
 
 from . import model
@@ -87,6 +88,12 @@ class TagsManagerDialog(tk.Toplevel):
     def _add(self):
         name = self._input_tag_name.get()
         if name == "":
+            return
+
+        if model.Tag(name=name) in self._controller.tags:
+            messagebox.showerror(
+                "Tag already present", f"\"{name}\" tag is already present"
+            )
             return
 
         self._controller.add_tag(model.Tag(name=name))

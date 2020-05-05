@@ -20,11 +20,6 @@ class TagsManagerDialog(tk.Toplevel):
         if sys.platform == 'linux':
             self.attributes('-type', 'dialog')  # make window floating on i3wm
 
-        self.grab_set()
-        self.focus_set()
-
-        self.transient(master=master)
-
         pad = 4
 
         ALL = tk.N + tk.S + tk.W + tk.E
@@ -84,6 +79,16 @@ class TagsManagerDialog(tk.Toplevel):
 
         self._controller = controller
         self.refresh()
+
+        self.grab_set()
+        self.focus_set()
+        self.transient(master=master)
+
+        width = self.winfo_width()
+        height = self.winfo_height()
+        x = (master.winfo_width() // 2) - (width // 2)
+        y = (master.winfo_height() // 2) - (height // 2)
+        self.geometry(f'+{x}+{y}')
 
     def _add(self):
         name = self._input_tag_name.get()

@@ -84,10 +84,16 @@ class TagsManagerDialog(tk.Toplevel):
         self.focus_set()
         self.transient(master=master)
 
+        self.update_idletasks()
+
         width = self.winfo_width()
         height = self.winfo_height()
-        x = (master.winfo_width() // 2) - (width // 2)
-        y = (master.winfo_height() // 2) - (height // 2)
+
+        root = master.winfo_toplevel()
+
+        x = root.winfo_x() + (root.winfo_width() // 2) - (width // 2)
+        y = root.winfo_y() + (root.winfo_height() // 2) - (height // 2)
+
         self.geometry(f'+{x}+{y}')
 
     def _add(self):

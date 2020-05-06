@@ -29,6 +29,7 @@ class TagsManagerDialog(tk.Toplevel):
         entry.grid(row=0, column=0, sticky=ALL, padx=pad, pady=pad)
 
         entry.bind('<Return>', lambda _: self._add())
+        entry.focus()
 
         add_button = tk.Button(master=self, text="Add", command=self._add)
         add_button.grid(row=0, column=1, sticky=ALL, padx=pad, pady=pad)

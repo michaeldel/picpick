@@ -35,18 +35,10 @@ class MainWindow(tk.Tk):
         sidebar = ttk.PanedWindow(master=pw, orient=tk.VERTICAL)
 
         file_list = FileList(master=sidebar, controller=controller)
-        tag_list = TagList(master=sidebar, controller=controller)
-        tag_manager_button = tk.Button(
-            master=sidebar,
-            text="Manage tags",
-            command=lambda: dialogs.TagsManagerDialog(
-                master=self, controller=controller
-            ),
-        )
+        tag_section = TagSection(master=sidebar, controller=controller)
 
         sidebar.add(file_list)
-        sidebar.add(tag_manager_button)
-        sidebar.add(tag_list)
+        sidebar.add(tag_section)
 
         pw.add(sidebar)
         pw.add(image_display)
@@ -54,7 +46,7 @@ class MainWindow(tk.Tk):
         self._menu = menu
 
         self.file_list = file_list
-        self.tag_list = tag_list
+        self.tag_list = tag_section.tag_list
         self.image_display = image_display
 
     def mark_unsaved(self):
@@ -133,6 +125,25 @@ class FileList(tk.Frame):
         image = self._current_selected_image
         if image is not None:
             self._controller.set_current_image(image)
+
+
+class TagSection(tk.Frame):
+    def __init__(self, master, controller: Controller):
+        super().__init__(master=master)
+
+        tag_list = TagList(master=self, controller=controller)
+        tag_manager_button = tk.Button(
+            master=self,
+            text="Manage tags",
+            command=lambda: dialogs.TagsManagerDialog(
+                master=self, controller=controller
+            ),
+        )
+
+        tag_list.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        tag_manager_button.pack(fill=tk.X, expand=0, side=tk.BOTTOM, padx=8, pady=8)
+
+        self.tag_list = tag_list
 
 
 class TagList(tk.Frame):

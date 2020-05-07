@@ -47,7 +47,7 @@ class ImageDisplay(tk.Canvas):
             return
 
         # use thumbnail to maintain aspect ratio
-        resized = self._image.copy()
+        resized = self._image.copy()  # type: ignore
         resized.thumbnail((width, height), Image.ANTIALIAS)
 
         self._set_canvas_image(resized)

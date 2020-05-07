@@ -158,6 +158,8 @@ def test_update_tag(model_factory):
     view.reset_mock()
 
     controller = Controller(model_factory(('pic.jpg',), ("foo", "bar")))
+    assert controller.current_image is not None
+
     controller.current_image.tags = {Tag(name="foo"), Tag(name="bar")}
 
     controller._view = view

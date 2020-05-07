@@ -49,6 +49,7 @@ def test_empty_add_one_image_and_tag_it(basedir, image_factory):
 
     controller.add_image(image_factory('foo.jpg'))
     assert [image.path.name for image in controller.images] == ['foo.jpg']
+    assert controller.current_image is not None
 
     controller.add_tag(Tag(name='alpha'))
     controller.add_tag(Tag(name='beta'))

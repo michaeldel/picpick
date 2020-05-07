@@ -5,7 +5,7 @@ import tkinter.ttk as ttk
 import sys
 
 from tkinter import messagebox
-from typing import List, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
 from . import model
 
@@ -113,14 +113,23 @@ class TagsManagerDialog(tk.Toplevel):
         self.refresh()
 
     def _delete(self):
+        if self._selected_tag is None:
+            messagebox.showerror(
+                "No tag selected", "Cannot delete tag when no tag is selected"
+            )
+            return
+
         self._controller.delete_tag(self._selected_tag)
         self._input_tag_name.set("")
         self.refresh()
 
     @property
-    def _selected_tag(self) -> model.Tag:
+    def _selected_tag(self) -> Optional[model.Tag]:
         selection = self._tags_list.curselection()
-        assert isinstance(selection, tuple) and len(selection) == 1
+
+        if selection == ():
+            return None
+        assert len(selection) == 1
 
         index = selection[0]
         assert isinstance(index, int)

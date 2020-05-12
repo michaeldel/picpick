@@ -34,7 +34,7 @@ class MainWindow(tk.Tk):
 
         sidebar = ttk.PanedWindow(master=pw, orient=tk.VERTICAL)
 
-        file_list = FileList(master=sidebar, controller=controller)
+        file_list = widgets.FileList(master=sidebar)
         tag_section = TagSection(master=sidebar, controller=controller)
 
         sidebar.add(file_list)
@@ -55,76 +55,6 @@ class MainWindow(tk.Tk):
     def mark_saved(self):
         self.title("PicPick")
         self._menu.enable_save()
-
-
-class FileList(tk.Frame):
-    def __init__(self, master, controller: Controller):
-        super().__init__(master=master)
-
-        tree = ttk.Treeview(master=self, selectmode='browse')
-        scroll = ttk.Scrollbar(master=self, orient=tk.VERTICAL)
-
-        tree.configure(yscrollcommand=scroll.set)
-        scroll.configure(command=tree.yview)
-
-        # pack in this order to prevent scrollbar from disappearing when
-        # reducing widget size
-        scroll.pack(fill=tk.Y, side=tk.RIGHT)
-        tree.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
-
-        tree.heading('#0', text="File")
-
-        tree.bind('<<TreeviewSelect>>', lambda _: self._on_select())
-
-        self._tree = tree
-        self._controller = controller
-
-        self.set_items(controller.images)
-
-    def set_current_image(self, image: model.Image):
-        # avoid infinite event callback loop
-        if image == self._current_selected_image:
-            return
-
-        key = self._images_index.index(image)
-        for child in self._tree.get_children():
-            tags = self._tree.item(child)['tags']
-            if tags == [key]:
-                break
-        else:
-            raise IndexError
-
-        self._tree.selection_set((child,))
-
-    def _reset(self):
-        self._tree.delete(*self._tree.get_children())
-
-    def set_items(self, images: List[model.Image]):
-        self._reset()
-
-        ROOT = ''
-        for i, image in enumerate(images):
-            text = image.path.name
-            tag = str(i)
-            self._tree.insert(ROOT, tk.END, text=text, tags=(tag,))
-        self._images_index = images
-
-    @property
-    def _current_selected_image(self) -> Optional[model.Image]:
-        tree_selection = self._tree.selection()
-
-        if tree_selection == ():  # if no image selected
-            return None
-
-        assert isinstance(tree_selection, tuple) and len(tree_selection) == 1
-
-        key = self._tree.item(tree_selection[0])['tags'][0]
-        return self._images_index[key]
-
-    def _on_select(self):
-        image = self._current_selected_image
-        if image is not None:
-            self._controller.set_current_image(image)
 
 
 class TagSection(tk.Frame):

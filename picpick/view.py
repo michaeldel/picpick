@@ -76,69 +76,6 @@ class TagSection(tk.Frame):
         self.tag_list = tag_list
 
 
-class TagList(tk.Frame):
-    def __init__(self, master, controller: Controller):
-        super().__init__(master=master)
-        label = tk.Label(master=self, text="Tags")
-        label.pack()
-
-        self._checkboxes: List[tk.Checkbutton] = []
-        self._checked_variables: List[tk.BooleanVar] = []
-
-        self._controller = controller
-
-        self.set_tags(controller.tags)
-
-    def set_current_image(self, image: model.Image):
-        assert image.tags.issubset(self._tags)
-
-        for tag, variable in zip(self._tags, self._checked_variables):
-            variable.set(tag in image.tags)
-
-    def _reset(self):
-        for checkbox in self._checkboxes:
-            checkbox.destroy()
-
-        self._checkboxes = []
-        self._checked_variables = []
-
-    def set_tags(self, tags: List[model.Tag]):
-        self._reset()
-
-        for i, tag in enumerate(tags):
-            variable = tk.BooleanVar(value=False)
-
-            def command(tag: model.Tag = tag, checked: tk.BooleanVar = variable):
-                if checked.get():
-                    self._controller.tag_current_image(tag)
-                else:
-                    self._controller.untag_current_image(tag)
-
-            shortcut: Optional[int]
-
-            if i < 9:
-                shortcut = i + 1
-                text = f"[{shortcut}] {tag.name}"
-            else:
-                shortcut = None
-                text = tag.name
-
-            checkbox = tk.Checkbutton(
-                master=self, text=text, anchor=tk.W, variable=variable, command=command,
-            )
-            checkbox.pack(fill=tk.X)
-
-            if shortcut:
-                root = self.winfo_toplevel()
-                assert isinstance(root, MainWindow)
-                root.bind(str(shortcut), lambda _, cb=checkbox: cb.invoke())
-
-            self._checkboxes.append(checkbox)
-            self._checked_variables.append(variable)
-
-        self._tags = tags
-
-
 class Menu(tk.Menu):
     def __init__(self, master, controller: Controller):
         super().__init__(master=master)

@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from bidict import bidict  # type: ignore
 from PIL import Image, ImageTk  # type: ignore
@@ -116,3 +116,64 @@ class FileList(tk.Frame):
 
         iid = self._images_index.inverse[image]
         self._tree.selection_set((iid,))
+
+
+class TagList(tk.Frame):
+    def __init__(self, master, callback: Callable):
+        super().__init__(master=master)
+        label = tk.Label(master=self, text="Tags")
+        label.pack()
+
+        self._tags: List[model.Tag] = []
+        self._checkboxes: List[tk.Checkbutton] = []
+        self._checked_variables: List[tk.BooleanVar] = []
+
+        self._callback = callback
+
+        self.set_current_image(image=None)
+
+    def _reset(self):
+        for checkbox in self._checkboxes:
+            checkbox.destroy()
+
+        self._checkboxes = []
+        self._checked_variables = []
+
+    def set_tags(self, tags: List[model.Tag]):
+        self._reset()
+
+        for i, tag in enumerate(tags):
+            variable = tk.BooleanVar(value=False)
+
+            shortcut: Optional[int]
+
+            if i < 9:
+                shortcut = i + 1
+                text = f"[{shortcut}] {tag.name}"
+            else:
+                shortcut = None
+                text = tag.name
+
+            def command(tag=tag, variable=variable):
+                self._callback(tag, variable.get())
+
+            checkbox = tk.Checkbutton(
+                master=self, text=text, anchor=tk.W, variable=variable, command=command
+            )
+            checkbox.pack(fill=tk.X)
+
+            self._checkboxes.append(checkbox)
+            self._checked_variables.append(variable)
+
+        self._tags = tags
+        self.set_current_image(self._current_image)
+
+    def set_current_image(self, image: Optional[model.Image]):
+        state = tk.DISABLED if image is None else tk.NORMAL
+        for checkbox in self._checkboxes:
+            checkbox.config(state=state)
+
+        for tag, variable in zip(self._tags, self._checked_variables):
+            variable.set(tag in image.tags if image is not None else False)
+
+        self._current_image = image

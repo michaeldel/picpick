@@ -8,6 +8,9 @@ def test_version():
     assert __version__ == '0.1.0'
 
 
+# TODO: replace controller calls with (mocked) view ones
+
+
 def test_empty_add_some_tags(basedir):
     controller = Controller(model=Model())
     assert controller._view._window.title() == "PicPick *"

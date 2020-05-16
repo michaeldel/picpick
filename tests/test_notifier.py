@@ -17,13 +17,13 @@ def test_register_and_notify():
     b = mock.Mock()
     c = mock.Mock()
 
-    notifier.register(Event.FOO, a)
-    notifier.register(Event.BAR, b)
+    notifier.register(Event.FOO, a)  # type: ignore
+    notifier.register(Event.BAR, b)  # type: ignore
 
-    notifier.register(Event.FOO, c)
-    notifier.register(Event.BAR, c)
+    notifier.register(Event.FOO, c)  # type: ignore
+    notifier.register(Event.BAR, c)  # type: ignore
 
-    notifier.notify(Event.FOO)
+    notifier.notify(Event.FOO)  # type: ignore
 
     a.assert_called_once_with()
     b.assert_not_called()
@@ -32,7 +32,7 @@ def test_register_and_notify():
     a.reset_mock()
     c.reset_mock()
 
-    notifier.notify(Event.BAR)
+    notifier.notify(Event.BAR)  # type: ignore
 
     a.assert_not_called()
     b.assert_called_once_with()

@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from . import storage
 from .model import Image, Model, Tag
-from .view import MainWindow
+from .view import View
 
 
 class Controller:
@@ -14,14 +14,14 @@ class Controller:
 
     def _init(self, model: Model):
         self._model = model
-        self._view: MainWindow
 
-        if hasattr(self, '_view'):
-            self._view.destroy()
+        self._view = View(controller=self, model=model)
 
-        self._view = MainWindow(controller=self)
+        if len(model.tags) > 0:
+            self._view.update_tags()
 
         if len(model.images) > 0:
+            self._view.update_images()
             self.set_current_image(self.images[0])
 
     def add_image(self, image: Image):
@@ -33,7 +33,7 @@ class Controller:
 
         self._model.images.add(image)
 
-        self._view.file_list.set_items(self.images)
+        self._view.update_images()
 
         if self.current_image is None:
             self.set_current_image(image)
@@ -42,19 +42,21 @@ class Controller:
         assert tag not in self._model.tags
 
         self._model.tags.add(tag)
-        self._view.tag_list.set_tags(self.tags)
+        self._view.update_tags()
 
     def delete_tag(self, tag: Tag):
         self._model.tags.remove(tag)
 
+        in_current_image = (
+            tag in self.current_image.tags if self.current_image else False
+        )
+
         for image in self._model.images:
             image.tags.discard(tag)
 
-        self._view.tag_list.set_tags(self.tags)
-        if hasattr(self, '_current_image'):
-            self._view.tag_list.set_current_image(self._current_image)
-
-        self._view.mark_unsaved()
+        self._view.update_tags()
+        if in_current_image:
+            self._view.update_current_image_tags()
 
     def update_tag(self, old: Tag, new: Tag):
         assert old in self._model.tags
@@ -70,11 +72,7 @@ class Controller:
                 image.tags.remove(old)
                 image.tags.add(new)
 
-        self._view.tag_list.set_tags(self.tags)
-        if hasattr(self, '_current_image'):
-            self._view.tag_list.set_current_image(self._current_image)
-
-        self._view.mark_unsaved()
+        self._view.update_tags()
 
     @property
     def images(self) -> List[Image]:
@@ -98,25 +96,26 @@ class Controller:
             return
 
         self._current_image = image
-
-        self._view.tag_list.set_current_image(image)
-        self._view.file_list.set_current_image(image)
-        self._view.image_display.set_image(image)
-        self._view.mark_unsaved()
+        self._view.update_current_image()
 
     def tag_current_image(self, tag: Tag):
         assert tag in self._model.tags
         assert tag not in self._current_image.tags
 
         self._current_image.tags.add(tag)
-        self._view.mark_unsaved()
+        self._view.update_current_image_tags()
 
     def untag_current_image(self, tag: Tag):
         assert tag in self._model.tags
         assert tag in self._current_image.tags
 
         self._current_image.tags.remove(tag)
-        self._view.mark_unsaved()
+        self._view.update_current_image_tags()
+
+    def set_current_image_tag(self, tag: Tag, present: bool):
+        if present:
+            return self.tag_current_image(tag)
+        return self.untag_current_image(tag)
 
     def save_current(self):
         assert hasattr(self, 'last_save_path')
@@ -145,7 +144,7 @@ class Controller:
         self._view.mark_saved()
 
     def run(self):
-        self._view.mainloop()
+        self._view.run()
 
     class ImageAlreadyPresent(Exception):
         def __init__(self, image: Image):

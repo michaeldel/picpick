@@ -3,6 +3,8 @@ import pathlib
 from dataclasses import dataclass
 from typing import Set
 
+from .notifier import Notifier
+
 
 class Image:
     def __init__(self, path: pathlib.Path):
@@ -17,5 +19,6 @@ class Tag:
 
 class Model:
     def __init__(self):
+        self.notifier = Notifier()
         self.images: Set[Image] = set()
         self.tags: Set[Tag] = set()

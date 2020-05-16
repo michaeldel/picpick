@@ -1,5 +1,6 @@
-from enum import Enum
+from enum import auto, Enum
 
 
 class Event(Enum):
-    pass
+    IMAGES_CHANGED = auto()
+    CURRENT_IMAGE_CHANGED = auto()

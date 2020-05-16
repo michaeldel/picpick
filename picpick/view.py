@@ -6,12 +6,46 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 from tkinter import filedialog, messagebox
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from . import dialogs, model, widgets
 
 if TYPE_CHECKING:  # required to prevent circular imports
     from .controller import Controller
+    from .model import Model
+
+
+class View:
+    def __init__(self, controller: Controller, model: Model):
+        self._controller = controller
+        self._model = model
+
+        self._window = MainWindow(controller=controller)
+
+    def run(self):
+        self._window.mainloop()
+
+    def mark_saved(self):
+        self._window.mark_saved()
+
+    def update_images(self):
+        images = sorted(self._model.images, key=lambda image: image.path.name)
+        self._window.file_list.set_images(images)
+        self._window.mark_unsaved()
+
+    def update_current_image(self):
+        self._window.file_list.select(self._controller.current_image)
+        self.update_current_image_tags()
+        self._window.mark_unsaved()
+
+    def update_tags(self):
+        tags = sorted(self._model.tags, key=lambda tag: tag.name)
+        self._window.tag_list.set_tags(tags)
+        self._window.mark_unsaved()
+
+    def update_current_image_tags(self):
+        self._window.tag_list.set_current_image(self._controller.current_image)
+        self._window.mark_unsaved()
 
 
 class MainWindow(tk.Tk):
@@ -46,7 +80,7 @@ class MainWindow(tk.Tk):
         self._menu = menu
 
         self.file_list = file_list
-        self.tag_list = tag_section.tag_list
+        self.tag_list: widgets.TagList = tag_section.tag_list
         self.image_display = image_display
 
     def mark_unsaved(self):
@@ -61,7 +95,9 @@ class TagSection(tk.Frame):
     def __init__(self, master, controller: Controller):
         super().__init__(master=master)
 
-        tag_list = TagList(master=self, controller=controller)
+        tag_list = widgets.TagList(
+            master=self, callback=controller.set_current_image_tag
+        )
         tag_manager_button = tk.Button(
             master=self,
             text="Manage tags",

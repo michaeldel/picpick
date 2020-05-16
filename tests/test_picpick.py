@@ -10,7 +10,7 @@ def test_version():
 
 def test_empty_add_some_tags(basedir):
     controller = Controller(model=Model())
-    assert controller._view.title() == "PicPick *"
+    assert controller._view._window.title() == "PicPick *"
     assert controller.images == []
     assert controller.tags == []
     assert controller.current_image is None
@@ -21,31 +21,31 @@ def test_empty_add_some_tags(basedir):
     assert controller.tags == [Tag(name="alpha"), Tag(name="beta"), Tag(name="gamma")]
 
     controller.save(basedir / 'save.picpick')
-    assert controller._view.title() == "PicPick"
+    assert controller._view._window.title() == "PicPick"
 
     # eventually wants to remove beta
     controller.delete_tag(Tag(name="beta"))
     assert controller.tags == [Tag(name="alpha"), Tag(name="gamma")]
 
-    assert controller._view.title() == "PicPick *"
+    assert controller._view._window.title() == "PicPick *"
     controller.save(basedir / 'save.picpick')
-    assert controller._view.title() == "PicPick"
+    assert controller._view._window.title() == "PicPick"
 
     # renames alpha to delta
     controller.update_tag(old=Tag(name="alpha"), new=Tag(name="delta"))
     assert controller.tags == [Tag(name="delta"), Tag(name="gamma")]
-    assert controller._view.title() == "PicPick *"
+    assert controller._view._window.title() == "PicPick *"
 
 
 def test_empty_add_one_image_and_tag_it(basedir, image_factory):
     controller = Controller(model=Model())
-    assert controller._view.title() == "PicPick *"
+    assert controller._view._window.title() == "PicPick *"
     assert controller.images == []
     assert controller.tags == []
     assert controller.current_image is None
 
     controller.save(basedir / 'save.picpick')
-    assert controller._view.title() == "PicPick"
+    assert controller._view._window.title() == "PicPick"
 
     controller.add_image(image_factory('foo.jpg'))
     assert [image.path.name for image in controller.images] == ['foo.jpg']
@@ -55,9 +55,9 @@ def test_empty_add_one_image_and_tag_it(basedir, image_factory):
     controller.add_tag(Tag(name='beta'))
     assert controller.tags == [Tag(name='alpha'), Tag(name='beta')]
 
-    assert controller._view.title() == "PicPick *"
+    assert controller._view._window.title() == "PicPick *"
     controller.save(basedir / 'save.picpick')
-    assert controller._view.title() == "PicPick"
+    assert controller._view._window.title() == "PicPick"
 
     assert controller.current_image.path.name == 'foo.jpg'
     assert controller.current_image.tags == set()
@@ -66,9 +66,9 @@ def test_empty_add_one_image_and_tag_it(basedir, image_factory):
     controller.tag_current_image(Tag(name='beta'))
     assert controller.current_image.tags == {Tag(name='alpha'), Tag(name='beta')}
 
-    assert controller._view.title() == "PicPick *"
+    assert controller._view._window.title() == "PicPick *"
     controller.save(basedir / 'save.picpick')
-    assert controller._view.title() == "PicPick"
+    assert controller._view._window.title() == "PicPick"
 
     # eventually wants to rename the first tag and delete the second
     controller.update_tag(old=Tag(name="alpha"), new=Tag(name="gamma"))
@@ -83,7 +83,7 @@ def test_empty_add_one_image_and_tag_it(basedir, image_factory):
 def test_tag_some_images(basedir, model: Model):
     controller = Controller(model=model)
 
-    assert controller._view.title() == "PicPick *"
+    assert controller._view._window.title() == "PicPick *"
 
     # images and tags must be ordered alphabetically
     assert [image.path.name for image in controller.images] == [
@@ -122,7 +122,7 @@ def test_tag_some_images(basedir, model: Model):
 
     # save picking to file
     controller.save(basedir / 'save.pickle')
-    assert controller._view.title() == "PicPick"
+    assert controller._view._window.title() == "PicPick"
 
     # add tags to last image
     controller.set_current_image(controller.images[2])
@@ -131,11 +131,11 @@ def test_tag_some_images(basedir, model: Model):
 
     controller.tag_current_image(blue)
     assert controller.current_image.tags == {blue}
-    assert controller._view.title() == "PicPick *"
+    assert controller._view._window.title() == "PicPick *"
 
     # load previous picking and ensure tagging rollbacked
     controller.load(basedir / 'save.pickle')
-    assert controller._view.title() == "PicPick"
+    assert controller._view._window.title() == "PicPick"
 
     # tags an images should be the same
     assert [image.path.name for image in controller.images] == [
@@ -153,7 +153,7 @@ def test_tag_some_images(basedir, model: Model):
     controller.set_current_image(controller.images[2])
     assert controller.current_image.path.name == 'two.jpg'
     assert controller.current_image.tags == set()
-    assert controller._view.title() == "PicPick *"
+    assert controller._view._window.title() == "PicPick *"
 
     # first image tags should have remained the same
     controller.set_current_image(controller.images[0])
@@ -170,14 +170,14 @@ def test_tag_some_images(basedir, model: Model):
 
     # save with save current (not save as) function
     controller.save_current()
-    assert controller._view.title() == "PicPick"
+    assert controller._view._window.title() == "PicPick"
 
     # remove tag from last image and load again to ensure save worked
     controller.untag_current_image(red)
     assert controller.current_image.tags == set()
 
     controller.load(basedir / 'save.pickle')
-    assert controller._view.title() == "PicPick"
+    assert controller._view._window.title() == "PicPick"
 
     assert controller.current_image.path.name == 'two.jpg'
     assert controller.current_image.tags == {red}

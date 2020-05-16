@@ -1,5 +1,4 @@
 import pathlib
-import tkinter as tk
 
 from unittest import mock
 
@@ -35,14 +34,14 @@ def test_add_image(image_factory):
     assert controller._current_image.path.name == 'foo.jpg'
     assert [image.path.name for image in controller.images] == ['foo.jpg']
 
-    view.file_list.set_items.assert_called_once_with(controller.images)
+    view.update_images.assert_called_once_with()
     view.reset_mock()
 
     controller.add_image(image_factory('bar.jpg'))
     assert controller._current_image.path.name == 'foo.jpg'
     assert [image.path.name for image in controller.images] == ['bar.jpg', 'foo.jpg']
 
-    view.file_list.set_items.assert_called_once_with(controller.images)
+    view.update_images.assert_called_once_with()
     view.reset_mock()
 
     # adding the same image twice should fail
@@ -52,7 +51,7 @@ def test_add_image(image_factory):
         controller.add_image(image_factory('foo.jpg'))
     assert [image.path.name for image in controller.images] == ['bar.jpg', 'foo.jpg']
 
-    view.file_list.set_items.assert_not_called()
+    view.update_images.assert_not_called()
     view.reset_mock()
 
 
@@ -79,12 +78,12 @@ def test_add_tag():
 
     controller.add_tag(Tag(name="foo"))
 
-    view.tag_list.set_tags.assert_called_once_with([Tag(name="foo")])
+    view.update_tags.assert_called_once_with()
     view.reset_mock()
 
     controller.add_tag(Tag(name="bar"))
 
-    view.tag_list.set_tags.assert_called_once_with([Tag(name="bar"), Tag(name="foo")])
+    view.update_tags.assert_called_once_with()
     view.reset_mock()
 
     assert controller.tags == [Tag(name="bar"), Tag(name="foo")]
@@ -100,12 +99,10 @@ def test_delete_tag(model_factory):
     controller.delete_tag(Tag(name="foo"))
     assert controller._model.tags == set()
 
-    view.tag_list.set_tags.assert_called_once_with([])
+    view.update_tags.assert_called_once_with()
 
     # no loaded image, hence should not update it
-    view.tag_list.set_current_image.assert_not_called()
-
-    view.mark_unsaved.assert_called_once()
+    view.update_current_image_tags.assert_not_called()
     view.reset_mock()
 
     controller = Controller(model_factory(('pic.jpg',), ("foo", "bar")))
@@ -122,9 +119,8 @@ def test_delete_tag(model_factory):
     assert controller._model.tags == {Tag(name="bar")}
     assert controller.current_image.tags == {Tag(name="bar")}
 
-    view.tag_list.set_tags.assert_called_once_with([Tag(name="bar")])
-    view.tag_list.set_current_image.assert_called_once_with(controller.current_image)
-    view.mark_unsaved.assert_called_once()
+    view.update_tags.assert_called_once_with()
+    view.update_current_image_tags.assert_called_once_with()
     view.reset_mock()
 
     controller.delete_tag(Tag(name="bar"))
@@ -133,9 +129,8 @@ def test_delete_tag(model_factory):
     assert controller._model.tags == set()
     assert controller.current_image.tags == set()
 
-    view.tag_list.set_tags.assert_called_once_with([])
-    view.tag_list.set_current_image.assert_called_once_with(controller.current_image)
-    view.mark_unsaved.assert_called_once()
+    view.update_tags.assert_called_once_with()
+    view.update_current_image_tags.assert_called_once_with()
     view.reset_mock()
 
 
@@ -149,12 +144,10 @@ def test_update_tag(model_factory):
     controller.update_tag(old=Tag(name="foo"), new=Tag(name="bar"))
     assert controller._model.tags == {Tag(name="bar")}
 
-    view.tag_list.set_tags.assert_called_once_with([Tag(name="bar")])
+    view.update_tags.assert_called_once_with()
 
     # no loaded image, hence should not update it
-    view.tag_list.set_current_image.assert_not_called()
-
-    view.mark_unsaved.assert_called_once()
+    view.update_current_image_tags.assert_not_called()
     view.reset_mock()
 
     controller = Controller(model_factory(('pic.jpg',), ("foo", "bar")))
@@ -170,9 +163,8 @@ def test_update_tag(model_factory):
     assert controller._model.tags == {Tag(name="foo"), Tag(name="qux")}
     assert controller.current_image.tags == {Tag(name="foo"), Tag(name="qux")}
 
-    view.tag_list.set_tags.assert_called_once_with([Tag(name="foo"), Tag(name="qux")])
-    view.tag_list.set_current_image.assert_called_once_with(controller.current_image)
-    view.mark_unsaved.assert_called_once()
+    view.update_tags.assert_called_once_with()
+    view.update_current_image_tags.assert_not_called()
     view.reset_mock()
 
     with pytest.raises(
@@ -185,9 +177,8 @@ def test_update_tag(model_factory):
     assert controller._model.tags == {Tag(name="foo"), Tag(name="qux")}
     assert controller.current_image.tags == {Tag(name="foo"), Tag(name="qux")}
 
-    view.tag_list.set_tags.assert_not_called()
-    view.tag_list.set_current_image.assert_not_called()
-    view.mark_unsaved.assert_not_called()
+    view.update_tags.assert_not_called()
+    view.update_current_image_tags.assert_not_called()
     view.reset_mock()
 
 
@@ -216,16 +207,10 @@ def test_view_reinitialized_on_load(basedir: pathlib.Path, model: Model):
     controller.save(basedir / 'save.picpick')
 
     previous = controller._view
-    assert previous.winfo_exists()
 
     controller.load(basedir / 'save.picpick')
 
     assert controller._view is not previous
-    assert controller._view.winfo_exists()
-
-    # previous window must have been destroyed
-    with pytest.raises(tk.TclError, match=r'.* application has been destroyed$'):
-        previous.winfo_exists()
 
 
 def test_load_empty_project(basedir: pathlib.Path):
@@ -239,50 +224,3 @@ def test_load_empty_project(basedir: pathlib.Path):
     assert controller.current_image is None
     assert controller.images == []
     assert controller.tags == []
-
-
-def test_mark_view_saved_and_unsaved(basedir: pathlib.Path, model: Model):
-    controller = Controller(model=model)
-    view = mock.MagicMock()
-    controller._view = view
-
-    controller.save(basedir / 'save.picpick')
-    view.mark_saved.assert_called_once_with()
-    view.reset_mock()
-
-    controller.save_current()
-    view.mark_saved.assert_called_once_with()
-    view.reset_mock()
-
-    # setting to new image should mark unsaved
-    controller.set_current_image(controller.images[1])
-    view.mark_unsaved.assert_called_once_with()
-    view.reset_mock()
-
-    controller.save_current()
-    view.mark_saved.assert_called_once_with()
-    view.reset_mock()
-
-    # setting to current image should not mark unsaved
-    controller.set_current_image(controller._current_image)
-    view.mark_unsaved.assert_not_called()
-
-    # tagging an image should mark unsaved
-    tag = controller.tags[0]
-
-    controller.tag_current_image(tag)
-    view.mark_unsaved.assert_called_once_with()
-    view.reset_mock()
-
-    controller.save_current()
-    view.mark_saved.assert_called_once_with()
-    view.reset_mock()
-
-    # untagging an image should mark unsaved
-    controller.untag_current_image(tag)
-    view.mark_unsaved.assert_called_once_with()
-    view.reset_mock()
-
-    controller.save_current()
-    view.mark_saved.assert_called_once_with()
-    view.reset_mock()

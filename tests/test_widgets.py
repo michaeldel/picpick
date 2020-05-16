@@ -65,6 +65,12 @@ def test_file_list(image_factory):
 
     assert not file_list.select_event_generated()
 
+    file_list.select(None)
+    file_list.update()
+
+    assert file_list.selected is None
+    assert file_list.select_event_generated()
+
     file_list.select(b)
     file_list.update()
 
@@ -80,6 +86,9 @@ def test_file_list(image_factory):
     assert file_list.selected is None
 
     assert file_list.select_event_generated()
+
+    file_list.select(None)
+    file_list.update()
 
 
 def test_tag_list(image_factory):

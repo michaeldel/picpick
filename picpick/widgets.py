@@ -107,7 +107,11 @@ class FileList(tk.Frame):
         assert isinstance(selection, tuple) and len(selection) == 1
         return self._images_index[selection[0]]
 
-    def select(self, image: model.Image):
+    def select(self, image: Optional[model.Image]):
+        if image is None:
+            self._tree.selection_set(())
+            return
+
         assert image in self._images_index.values()
 
         # prevent infinite callback loop

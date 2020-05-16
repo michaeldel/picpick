@@ -1,15 +1,15 @@
-from enum import auto
+from enum import auto, Enum
 from unittest import mock
 
-from picpick import events
 from picpick.notifier import Notifier
 
 
-class Event(events.Event):
+class Event(Enum):
     FOO = auto()
     BAR = auto()
 
 
+@mock.patch('picpick.events.Event', Event)
 def test_register_and_notify():
     notifier = Notifier()
 

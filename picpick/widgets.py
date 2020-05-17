@@ -24,8 +24,8 @@ class ImageDisplay(tk.Canvas):
         self.bind('<Configure>', configure)
         self._image = None
 
-    def set_image(self, image: model.Image):
-        self._image = Image.open(image.path)
+    def set_image(self, image: Optional[model.Image]):
+        self._image = Image.open(image.path) if image else Image.new('RGB', (0, 0))
         self._resize()
 
     def _set_canvas_image(self, image: Image):
@@ -108,15 +108,15 @@ class FileList(tk.Frame):
         return self._images_index[selection[0]]
 
     def select(self, image: Optional[model.Image]):
+        # prevent infinite callback loop
+        if image == self.selected:
+            return
+
         if image is None:
             self._tree.selection_set(())
             return
 
         assert image in self._images_index.values()
-
-        # prevent infinite callback loop
-        if image == self.selected:
-            return
 
         iid = self._images_index.inverse[image]
         self._tree.selection_set((iid,))

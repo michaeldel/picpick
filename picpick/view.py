@@ -34,7 +34,10 @@ class View:
         self._window.mark_unsaved()
 
     def update_current_image(self):
-        self._window.file_list.select(self._controller.current_image)
+        image = self._controller.current_image
+        self._window.file_list.select(image)
+        self._window.image_display.set_image(image)
+
         self.update_current_image_tags()
         self._window.mark_unsaved()
 
@@ -69,6 +72,10 @@ class MainWindow(tk.Tk):
         sidebar = ttk.PanedWindow(master=pw, orient=tk.VERTICAL)
 
         file_list = widgets.FileList(master=sidebar)
+        file_list.bind(
+            '<<FileListSelect>>',
+            lambda _: controller.set_current_image(file_list.selected),
+        )
         tag_section = TagSection(master=sidebar, controller=controller)
 
         sidebar.add(file_list)
@@ -81,7 +88,7 @@ class MainWindow(tk.Tk):
 
         self.file_list = file_list
         self.tag_list: widgets.TagList = tag_section.tag_list
-        self.image_display = image_display
+        self.image_display: widgets.ImageDisplay = image_display
 
     def mark_unsaved(self):
         self.title("PicPick *")

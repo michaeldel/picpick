@@ -22,6 +22,9 @@ def test_current_image(model: Model):
     controller.set_current_image(controller.images[0])
     assert controller._current_image.path.name == 'one.jpg'
 
+    controller.set_current_image(None)
+    assert not hasattr(controller, '_current_image')
+
 
 def test_add_image(image_factory):
     view = mock.MagicMock()

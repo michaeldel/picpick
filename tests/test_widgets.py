@@ -14,6 +14,7 @@ class FileList(widgets.FileList):
         self.bind('<<FileListSelect>>', lambda _: self._callback())
 
     def select_event_generated(self) -> bool:
+        assert self._callback.call_count <= 1
         result = self._callback.called
         self._callback.reset_mock()
         return result

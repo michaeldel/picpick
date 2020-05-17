@@ -89,13 +89,19 @@ class Controller:
         except AttributeError:
             return None
 
-    def set_current_image(self, image: Image):
-        assert image in self._model.images
+    def set_current_image(self, image: Optional[Image]):
+        assert image is None or image in self._model.images
 
-        if getattr(self, 'current_image', None) is image:
+        if self.current_image is image:
             return
 
-        self._current_image = image
+        self._current_image: Image
+
+        if image is None:
+            del self._current_image
+        else:
+            self._current_image = image
+
         self._view.update_current_image()
 
     def tag_current_image(self, tag: Tag):

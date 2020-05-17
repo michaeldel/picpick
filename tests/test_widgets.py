@@ -91,6 +91,8 @@ def test_file_list(image_factory):
     file_list.select(None)
     file_list.update()
 
+    assert not file_list.select_event_generated()
+
 
 def test_tag_list(image_factory):
     callback = mock.Mock()

@@ -85,6 +85,9 @@ class FileList(tk.Frame):
         self._tree.delete(*self._tree.get_children())
 
     def set_images(self, images: List[model.Image]):
+        if self.selected not in images:
+            self.select(None)
+
         self._reset()
 
         index = bidict()

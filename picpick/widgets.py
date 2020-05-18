@@ -169,6 +169,10 @@ class TagList(tk.Frame):
             )
             checkbox.pack(fill=tk.X)
 
+            if shortcut:
+                root = checkbox.winfo_toplevel()
+                root.bind(str(shortcut), lambda _, cb=checkbox: cb.invoke())
+
             self._checkboxes.append(checkbox)
             self._checked_variables.append(variable)
 

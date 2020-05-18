@@ -44,10 +44,12 @@ class View:
     def update_tags(self):
         tags = sorted(self._model.tags, key=lambda tag: tag.name)
         self._window.tag_list.set_tags(tags)
+        self._window.file_list.refresh()  # TODO: add tests for this
         self._window.mark_unsaved()
 
     def update_current_image_tags(self):
         self._window.tag_list.set_current_image(self._controller.current_image)
+        self._window.file_list.refresh()  # TODO: add tests for this
         self._window.mark_unsaved()
 
 

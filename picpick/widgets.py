@@ -1,3 +1,4 @@
+import itertools
 import tkinter as tk
 import tkinter.ttk as ttk
 
@@ -67,6 +68,19 @@ class FileList(tk.Frame):
         tree.configure(yscrollcommand=scroll.set)
         scroll.configure(command=tree.yview)
 
+        frame = tk.Frame(master=self)
+        frame.pack(fill=tk.X)
+
+        filter_variable = tk.StringVar(master=self)
+
+        filter_label = tk.Label(master=frame, text="Filters")
+        filter_entry = tk.Entry(master=frame, textvariable=filter_variable)
+        filter_label.pack(side=tk.LEFT)
+        filter_entry.pack(fill=tk.X, expand=True)
+
+        filter_variable.trace(tk.W, lambda *_: self.refresh())
+        self._filter = filter_variable
+
         # pack in this order to prevent scrollbar from disappearing when
         # reducing widget size
         scroll.pack(fill=tk.Y, side=tk.RIGHT)
@@ -77,6 +91,8 @@ class FileList(tk.Frame):
         tree.bind('<<TreeviewSelect>>', lambda _: self._on_select())
 
         self._tree = tree
+
+        self.set_images([])
 
     def _on_select(self):
         self.event_generate('<<FileListSelect>>')
@@ -123,6 +139,31 @@ class FileList(tk.Frame):
 
         iid = self._images_index.inverse[image]
         self._tree.selection_set((iid,))
+
+    def refresh(self):
+        words = self._filter.get().split()
+
+        displayed = []
+        not_displayed = []
+
+        for item, image in self._images_index.items():
+            if (
+                any(
+                    word in tag.name
+                    for word, tag in itertools.product(words, image.tags)
+                )
+                or words == []
+            ):
+                displayed.append(item)
+            else:
+                not_displayed.append(item)
+
+        assert len(displayed) + len(not_displayed) == len(self._images_index)
+
+        ROOT = ''
+        for item in displayed:
+            self._tree.move(item, ROOT, tk.END)
+        self._tree.detach(*not_displayed)
 
 
 class TagList(tk.Frame):

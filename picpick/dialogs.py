@@ -7,7 +7,7 @@ import sys
 from tkinter import messagebox
 from typing import List, Optional, TYPE_CHECKING
 
-from . import model
+from .model import Tag
 
 if TYPE_CHECKING:  # required to prevent circular imports
     from .controller import Controller
@@ -102,13 +102,13 @@ class TagsManagerDialog(tk.Toplevel):
         if name == "":
             return
 
-        if model.Tag(name=name) in self._controller.tags:
+        if Tag(name=name) in self._controller.tags:
             messagebox.showerror(
                 "Tag already present", f"\"{name}\" tag is already present"
             )
             return
 
-        self._controller.add_tag(model.Tag(name=name))
+        self._controller.add_tag(Tag(name=name))
         self._input_tag_name.set("")
         self.refresh()
 
@@ -124,7 +124,7 @@ class TagsManagerDialog(tk.Toplevel):
         self.refresh()
 
     @property
-    def _selected_tag(self) -> Optional[model.Tag]:
+    def _selected_tag(self) -> Optional[Tag]:
         selection = self._tags_list.curselection()
 
         if selection == ():
@@ -153,7 +153,7 @@ class TagsManagerDialog(tk.Toplevel):
             self._tags_list.insert(tk.END, tag.name)
 
     @property
-    def _filtered_tags(self) -> List[model.Tag]:
+    def _filtered_tags(self) -> List[Tag]:
         pattern = self._input_tag_name.get()
         if pattern == "":
             return self._controller.tags

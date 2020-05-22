@@ -16,10 +16,22 @@ if TYPE_CHECKING:  # required to prevent circular imports
 class TagsManagerDialog(tk.Toplevel):
     def __init__(self, master, controller: Controller):
         super().__init__(master=master)
+        self.master: tk.Widget
 
         if sys.platform == 'linux':
             self.attributes('-type', 'dialog')  # make window floating on i3wm
 
+        self.__init_interface()
+
+        self._controller = controller
+        self.refresh()
+
+        self.__set_modal()
+        self.__init_position()
+
+        self.update_idletasks()
+
+    def __init_interface(self):
         pad = 4
 
         ALL = tk.N + tk.S + tk.W + tk.E
@@ -78,19 +90,18 @@ class TagsManagerDialog(tk.Toplevel):
         tk.Grid.columnconfigure(self, 0, weight=1)
         tk.Grid.rowconfigure(self, 1, weight=1)
 
-        self._controller = controller
-        self.refresh()
-
+    def __set_modal(self):
         self.grab_set()
         self.focus_set()
-        self.transient(master=master)
+        self.transient(master=self.master)
 
+    def __init_position(self):
         self.update_idletasks()
 
         width = self.winfo_width()
         height = self.winfo_height()
 
-        root = master.winfo_toplevel()
+        root = self.master.winfo_toplevel()
 
         x = root.winfo_x() + (root.winfo_width() // 2) - (width // 2)
         y = root.winfo_y() + (root.winfo_height() // 2) - (height // 2)

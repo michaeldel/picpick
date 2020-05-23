@@ -30,6 +30,7 @@ class TagsManagerDialog(tk.Toplevel):
         self.__init_position()
 
         self.update_idletasks()
+        self.wait_window(self)
 
     def __init_interface(self):
         pad = 4

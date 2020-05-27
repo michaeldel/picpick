@@ -1,6 +1,6 @@
 import pathlib
 
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from . import storage
 from .model import Image, Model, Tag
@@ -71,6 +71,14 @@ class Controller:
             if old in image.tags:
                 image.tags.remove(old)
                 image.tags.add(new)
+
+        self._view.update_tags()
+
+    def set_tags(self, tags: Set[Tag]):
+        self._model.tags = tags
+
+        for image in self._model.images:
+            image.tags.intersection_update(tags)
 
         self._view.update_tags()
 

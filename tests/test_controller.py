@@ -185,6 +185,43 @@ def test_update_tag(model_factory):
     view.reset_mock()
 
 
+def test_set_tags(image_factory):
+    model = Model()
+    view = mock.MagicMock()
+    controller = Controller(model=model)
+    assert controller.tags == []
+
+    image = image_factory('foo.jpg')
+    model.images.add(image)
+
+    controller._view = view
+
+    controller.set_tags({Tag(name="a"), Tag(name="b")})
+    assert controller.tags == [Tag(name="a"), Tag(name="b")]
+    assert model.tags == {Tag(name="a"), Tag(name="b")}
+
+    view.update_tags.assert_called_once()
+    view.reset_mock()
+
+    controller.set_tags({Tag(name="a"), Tag(name="b"), Tag(name="c")})
+    assert controller.tags == [Tag(name="a"), Tag(name="b"), Tag(name="c")]
+    assert model.tags == {Tag(name="a"), Tag(name="b"), Tag(name="c")}
+
+    view.update_tags.assert_called_once()
+    view.reset_mock()
+
+    image.tags = {Tag(name="a"), Tag(name="b"), Tag(name="c")}
+
+    controller.set_tags({Tag(name="a")})
+    assert controller.tags == [Tag(name="a")]
+    assert model.tags == {Tag(name="a")}
+
+    view.update_tags.assert_called_once()
+    view.reset_mock()
+
+    assert image.tags == {Tag(name="a")}
+
+
 def test_tags():
     controller = Controller(model=Model())
     assert controller.tags == []

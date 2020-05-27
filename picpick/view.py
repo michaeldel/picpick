@@ -6,13 +6,13 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 from tkinter import filedialog, messagebox
-from typing import TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
 from . import dialogs, model, widgets
 
 if TYPE_CHECKING:  # required to prevent circular imports
     from .controller import Controller
-    from .model import Model
+    from .model import Model, Tag
 
 
 class View:
@@ -108,17 +108,29 @@ class TagSection(tk.Frame):
             master=self, callback=controller.set_current_image_tag
         )
         tag_manager_button = tk.Button(
-            master=self,
-            text="Manage tags",
-            command=lambda: dialogs.TagsManagerDialog(
-                master=self, controller=controller
-            ),
+            master=self, text="Manage tags", command=self._open_tags_manager
         )
 
         tag_list.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         tag_manager_button.pack(fill=tk.X, expand=0, side=tk.BOTTOM, padx=8, pady=8)
 
         self.tag_list = tag_list
+
+        self._controller = controller
+        self._displayed_tags: List[Tag] = []
+
+    def _open_tags_manager(self):
+        dialog = dialogs.TagsManagerDialog(
+            master=self,
+            tags=self._controller._model.tags,  # TODO: properly refactor this
+            displayed_tags=self._displayed_tags,
+        )
+        self._controller.set_tags(dialog.tags)
+        self._displayed_tags = dialog.displayed_tags
+
+        self.tag_list.set_tags(
+            dialog.displayed_tags or sorted(dialog.tags, key=lambda t: t.name)
+        )
 
 
 class Menu(tk.Menu):

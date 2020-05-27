@@ -10,7 +10,7 @@ from typing import List, Optional, Set
 from .model import Tag
 
 
-class TagsManagerDialog(tk.Toplevel):
+class TagsManagerDialog(tk.Toplevel):  # TODO: consider simpledialogs.Dialog instead
     def __init__(self, master, tags: Set[Tag], displayed_tags: List[Tag]):
         super().__init__(master=master)
         self.master: tk.Widget
@@ -20,6 +20,8 @@ class TagsManagerDialog(tk.Toplevel):
 
         self._tags = tags
         self._displayed_tags = displayed_tags
+
+        self.title("Tags manager")
 
         if sys.platform == 'linux':
             self.attributes('-type', 'dialog')  # make window floating on i3wm

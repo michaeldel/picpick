@@ -10,8 +10,7 @@ def _check_save_data_valid(model: Model, current_index: Optional[int]):
     if model.images == set():
         assert current_index is None
     else:
-        assert current_index is not None
-        assert 0 <= current_index < len(model.images)
+        assert current_index is None or 0 <= current_index < len(model.images)
 
     assert len(set(image.path for image in model.images)) == len(model.images)
     assert all(image.tags.issubset(model.tags) for image in model.images)

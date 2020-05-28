@@ -31,7 +31,7 @@ class ImageDisplay(tk.Canvas):
 
     def _set_canvas_image(self, image: Image):
         # keep stored as object attribute to prevent garbage collection
-        self._photo = ImageTk.PhotoImage(image)
+        self._photo = ImageTk.PhotoImage(master=self, image=image)
 
         width = self.winfo_width()
         height = self.winfo_height()

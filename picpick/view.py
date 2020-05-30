@@ -16,9 +16,9 @@ if TYPE_CHECKING:  # required to prevent circular imports
 
 
 class View:
-    def __init__(self, controller: Controller, model: Model):
+    def __init__(self, controller: Controller):
+        self.model: Model
         self._controller = controller
-        self._model = model
 
         self._window = MainWindow(controller=controller)
 
@@ -29,7 +29,7 @@ class View:
         self._window.mark_saved()
 
     def update_images(self):
-        images = sorted(self._model.images, key=lambda image: image.path.name)
+        images = sorted(self.model.images, key=lambda image: image.path.name)
         self._window.file_list.set_images(images)
         self._window.mark_unsaved()
 
@@ -42,7 +42,7 @@ class View:
         self._window.mark_unsaved()
 
     def update_tags(self):
-        tags = sorted(self._model.tags, key=lambda tag: tag.name)
+        tags = sorted(self.model.tags, key=lambda tag: tag.name)
         self._window.tag_list.set_tags(tags)
         self._window.file_list.refresh()  # TODO: add tests for this
         self._window.mark_unsaved()

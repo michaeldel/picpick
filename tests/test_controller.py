@@ -241,16 +241,14 @@ def test_tags():
     ]
 
 
-def test_view_reinitialized_on_load(basedir: pathlib.Path, model: Model):
+def test_view_model_reinitialized_on_load(basedir: pathlib.Path, model: Model):
     controller = Controller(model=model)
 
     controller.save(basedir / 'save.picpick')
-
-    previous = controller._view
+    assert controller._view.model == model
 
     controller.load(basedir / 'save.picpick')
-
-    assert controller._view is not previous
+    assert controller._view.model != model
 
 
 def test_load_empty_project(basedir: pathlib.Path):

@@ -10,12 +10,12 @@ from .view import View
 class Controller:
     def __init__(self, model: Model):
         # required to comply with static typing
+        self._view = View(controller=self)
         self._init(model=model)
 
     def _init(self, model: Model):
         self._model = model
-
-        self._view = View(controller=self, model=model)
+        self._view.model = model
 
         if len(model.tags) > 0:
             self._view.update_tags()

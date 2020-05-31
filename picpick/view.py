@@ -111,8 +111,8 @@ class TagSection(tk.Frame):
             master=self, text="Manage tags", command=self._open_tags_manager
         )
 
-        tag_list.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         tag_manager_button.pack(fill=tk.X, expand=0, side=tk.BOTTOM, padx=8, pady=8)
+        tag_list.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
         self.tag_list = tag_list
 

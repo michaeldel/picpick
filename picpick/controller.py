@@ -146,7 +146,7 @@ class Controller:
         storage.save(to, self._model, current_index=current_index)
 
         self.last_save_path = to
-        self._view.mark_saved()
+        self._view.mark_saved(to.name)
 
     def load(self, source: pathlib.Path):
         model, current_index = storage.load(source)
@@ -155,7 +155,7 @@ class Controller:
 
         if current_index is not None:
             self.set_current_image(self.images[current_index])
-        self._view.mark_saved()
+        self._view.mark_saved(source.name)
 
     def run(self):
         self._view.run()

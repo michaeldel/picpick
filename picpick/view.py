@@ -25,8 +25,8 @@ class View:
     def run(self):
         self._window.mainloop()
 
-    def mark_saved(self):
-        self._window.mark_saved()
+    def mark_saved(self, filename: str):
+        self._window.mark_saved(filename)
 
     def update_images(self):
         images = sorted(self.model.images, key=lambda image: image.path.name)
@@ -93,10 +93,15 @@ class MainWindow(tk.Tk):
         self.image_display: widgets.ImageDisplay = image_display
 
     def mark_unsaved(self):
-        self.title("PicPick *")
+        if hasattr(self, '_last_saved_filename'):
+            filename = self._last_saved_filename
+            self.title(f"PicPick - {filename}*")
+        else:
+            self.title("PicPick *")
 
-    def mark_saved(self):
-        self.title("PicPick")
+    def mark_saved(self, filename: str):
+        self.title(f"PicPick - {filename}")
+        self._last_saved_filename = filename
         self._menu.enable_save()
 
 

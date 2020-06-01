@@ -57,7 +57,8 @@ class MainWindow(tk.Tk):
     def __init__(self, controller: Controller):
         super().__init__()
 
-        self.title("PicPick *")
+        self.mark_unsaved()
+        self.protocol('WM_DELETE_WINDOW', self.quit)
         self.geometry('928x640')
 
         if sys.platform == 'linux':
@@ -93,6 +94,7 @@ class MainWindow(tk.Tk):
         self.image_display: widgets.ImageDisplay = image_display
 
     def mark_unsaved(self):
+        self._unsaved = True
         if hasattr(self, '_last_saved_filename'):
             filename = self._last_saved_filename
             self.title(f"PicPick - {filename}*")
@@ -102,7 +104,17 @@ class MainWindow(tk.Tk):
     def mark_saved(self, filename: str):
         self.title(f"PicPick - {filename}")
         self._last_saved_filename = filename
+        self._unsaved = False
         self._menu.enable_save()
+
+    def quit(self):
+        if self._unsaved and not messagebox.askokcancel(
+            "Project unsaved",
+            "Current project has not been saved, are you sure you want to exit "
+            "PicPick? Changes will be lost.",
+        ):
+            return
+        super().quit()
 
 
 class TagSection(tk.Frame):
@@ -155,16 +167,14 @@ class Menu(tk.Menu):
         file_menu.add_separator()
         file_menu.add_command(label="Add images...", command=self._add_image)
         file_menu.add_separator()
-        file_menu.add_command(
-            label="Exit", command=master.quit, accelerator="Ctrl+Q"
-        )  # TODO: add confirm
+        file_menu.add_command(label="Exit", command=master.quit, accelerator="Ctrl+Q")
 
         self.add_cascade(label="File", menu=file_menu)
 
         master.bind_all('<Control-o>', lambda _: self._open())
         master.bind_all('<Control-s>', lambda _: self._save())
         master.bind_all('<Control-Shift-S>', lambda _: self._save_as())
-        master.bind_all('<Control-q>', lambda _: master.quit())  # TODO: add confirm
+        master.bind_all('<Control-q>', lambda _: master.quit())
 
         self._file_menu = file_menu
 
@@ -173,6 +183,13 @@ class Menu(tk.Menu):
             filetypes=(("picpick savefile", '.picpick'),)
         )
         if filename == () or filename == '':
+            return
+
+        if self.master._unsaved and not messagebox.askokcancel(  # type: ignore
+            "Project unsaved",
+            "Current project has not been saved, are you sure you want to load "
+            "new save? Changes will be lost.",
+        ):
             return
 
         path = pathlib.Path(filename)

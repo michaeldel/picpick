@@ -221,8 +221,6 @@ class TagList(tk.Frame):
         self.set_current_image(self._current_image)
 
     def set_current_image(self, image: Optional[model.Image]):
-        assert image is None or image.tags.issubset(self._tags)
-
         state = tk.DISABLED if image is None else tk.NORMAL
         for checkbox in self._checkboxes:
             checkbox.config(state=state)

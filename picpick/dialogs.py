@@ -37,37 +37,44 @@ class TagsManagerDialog(tk.Toplevel):  # TODO: consider simpledialogs.Dialog ins
         self.wait_window(self)
 
     def __init_interface(self):
+        self.__init_body()
+        self.__init_button_box()
+
+    def __init_body(self):
+        body = tk.Frame(master=self)
+        body.pack(fill=tk.BOTH, expand=1)
+
         pad = 4
 
         ALL = tk.N + tk.S + tk.W + tk.E
 
-        self._input_tag_name = tk.StringVar(master=self)
-        entry = tk.Entry(master=self, textvariable=self._input_tag_name)
+        self._input_tag_name = tk.StringVar(master=body)
+        entry = tk.Entry(master=body, textvariable=self._input_tag_name)
         entry.grid(row=0, column=0, sticky=ALL, padx=pad, pady=pad)
 
         entry.bind('<Return>', lambda _: self._add())
         entry.focus()
 
-        add_button = tk.Button(master=self, text="Add", command=self._add)
+        add_button = tk.Button(master=body, text="Add", command=self._add)
         add_button.grid(row=0, column=1, sticky=ALL, padx=pad, pady=pad)
 
         add_to_displayed_button = tk.Button(
-            master=self, text=">", command=self._add_to_displayed
+            master=body, text=">", command=self._add_to_displayed
         )
         add_to_displayed_button.grid(row=1, column=1, sticky=ALL, padx=pad, pady=pad)
         remove_from_displayed_button = tk.Button(
-            master=self, text="<", command=self._remove_from_displayed
+            master=body, text="<", command=self._remove_from_displayed
         )
         remove_from_displayed_button.grid(
             row=2, column=1, sticky=ALL, padx=pad, pady=pad
         )
 
-        delete_button = tk.Button(master=self, text="Delete", command=self._delete)
+        delete_button = tk.Button(master=body, text="Delete", command=self._delete)
         delete_button.grid(
             row=3, column=1, sticky=tk.S + tk.W + tk.E, padx=pad, pady=pad
         )
 
-        left_frame = tk.Frame(master=self)
+        left_frame = tk.Frame(master=body)
         left_frame.grid(row=1, column=0, rowspan=3, sticky=ALL, padx=pad, pady=pad)
 
         tags_list = tk.Listbox(master=left_frame)
@@ -79,7 +86,7 @@ class TagsManagerDialog(tk.Toplevel):  # TODO: consider simpledialogs.Dialog ins
         tags_scroll.pack(fill=tk.Y, side=tk.RIGHT)
         tags_list.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
-        right_frame = tk.Frame(master=self)
+        right_frame = tk.Frame(master=body)
         right_frame.grid(row=1, column=2, rowspan=3, sticky=ALL, padx=pad, pady=pad)
 
         displayed_tags_list = tk.Listbox(master=right_frame)
@@ -92,13 +99,10 @@ class TagsManagerDialog(tk.Toplevel):  # TODO: consider simpledialogs.Dialog ins
         displayed_tags_list.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
 
         items_count_display = tk.StringVar()
-        items_count = tk.Label(master=self, textvariable=items_count_display)
+        items_count = tk.Label(master=body, textvariable=items_count_display)
         items_count.grid(row=4, column=0, sticky=tk.W, padx=pad, pady=pad)
 
         self._items_count_display = items_count_display
-
-        button = tk.Button(master=self, text="OK", command=self.ok)
-        button.grid(row=4, column=1, sticky=ALL, padx=pad, pady=pad)
 
         self._input_tag_name.trace(tk.W, lambda *_: self.refresh())
 
@@ -106,8 +110,15 @@ class TagsManagerDialog(tk.Toplevel):  # TODO: consider simpledialogs.Dialog ins
         self._tags_list = tags_list
         self._displayed_tags_list = displayed_tags_list
 
-        tk.Grid.columnconfigure(self, 0, weight=1)
-        tk.Grid.rowconfigure(self, 1, weight=1)
+        tk.Grid.columnconfigure(body, 0, weight=1)
+        tk.Grid.rowconfigure(body, 1, weight=1)
+
+    def __init_button_box(self):
+        button_box = tk.Frame(master=self)
+        button_box.pack(fill=tk.X, padx=4, pady=4)
+
+        button = tk.Button(master=button_box, text="OK", width=8, command=self.ok)
+        button.pack(side=tk.RIGHT)
 
     def __set_modal(self):
         self.grab_set()

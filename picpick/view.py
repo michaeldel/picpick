@@ -179,6 +179,7 @@ class Menu(tk.Menu):
     def _save(self):
         if hasattr(self._controller, 'last_save_path'):
             self._controller.save_current()
+            return
         self._save_as()
 
     def _save_as(self):
